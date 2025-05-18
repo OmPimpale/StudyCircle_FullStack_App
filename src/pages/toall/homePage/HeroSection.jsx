@@ -3,6 +3,7 @@ import { motion } from 'motion/react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPersonChalkboard } from '@fortawesome/free-solid-svg-icons';
 import { faChalkboardUser } from '@fortawesome/free-solid-svg-icons';
+import { Link } from 'react-router';
 
 let HeroSection = () => {
 
@@ -61,8 +62,8 @@ let HeroSection = () => {
                             transition={{
                                 duration: .5
                             }}
-                            className="text-white text-[18px] border-1 border-[#4A90E2] bg-[#4A90E2] py-1.5 px-7 rounded-full me-7">
-                            Tutor <FontAwesomeIcon icon={faPersonChalkboard} size="lg" />
+                            className="text-white text-[18px] border-1 border-[#4A90E2] bg-[#4A90E2] py-1.5 rounded-full me-7">
+                            <Link to="/singUp" className='py-1.5 px-7'>Tutor <FontAwesomeIcon icon={faPersonChalkboard} size="lg" /></Link>
                         </motion.button>
                         <motion.button
                             initial={{
@@ -82,8 +83,8 @@ let HeroSection = () => {
                                 duration: .5
                             }}
                             id='studentBtn'
-                            className="text-black text-[18px] border-1 border-[#4A90E2] bg-white py-1.5 px-7 rounded-full me-2.5">
-                            Student <FontAwesomeIcon icon={faChalkboardUser} size="lg" />
+                            className="text-black text-[18px] border-1 border-[#4A90E2] bg-white py-1.5 rounded-full me-2.5">
+                            <Link to="/singUp" className='py-1.5 px-7'> Student <FontAwesomeIcon icon={faChalkboardUser} size="lg" /></Link>
                         </motion.button>
                     </div>
                 </div>

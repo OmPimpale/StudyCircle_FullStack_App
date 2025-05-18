@@ -69,7 +69,7 @@ let Navbar = () => {
                                     transition={{
                                         duration: .5
                                     }}
-                                    className='text-[#5a5a5a] border-1 border-[#4A90E2] bg-white py-1 px-3 rounded-full mx-5'><a href="">Get Started</a></motion.li>
+                                    className='text-[#5a5a5a] border-1 border-[#4A90E2] bg-white py-1 px-3 rounded-full mx-5'><Link to="/login">Get Started</Link></motion.li>
                             </motion.ul>
                         </div>
                     </div>
@@ -98,7 +98,7 @@ let Navbar = () => {
                             transition={{
                                 duration: .5
                             }}
-                            className='text-[#5a5a5a] border-1 border-[#4A90E2] bg-white py-1 px-3 rounded-full my-5 mx-auto w-[109px]'><a href="">Get Started</a></motion.li>
+                            className='text-[#5a5a5a] border-1 border-[#4A90E2] bg-white py-1 px-3 rounded-full my-5 mx-auto w-[109px]'><Link to="/login">Get Started</Link></motion.li>
                     </motion.ul>
                 </div>
             </section>
