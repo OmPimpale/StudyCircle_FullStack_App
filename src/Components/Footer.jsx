@@ -45,7 +45,7 @@ let Footer = () => {
                     <div className='my-10 lg:my-0'>
                         <h4 className='text-black font-bold text-2xl mb-6'>Contact Info</h4>
                         <p><FontAwesomeIcon icon={faLocationDot} size='lg' color='#4A90E2' /> Pune, Maharashtra, India</p>
-                        <p className='my-5'><a className='hover:text-[#FFA500] duration-300' href=""><FontAwesomeIcon icon={faEnvelopeCircleCheck} size='lg' color='#4A90E2' /> support@studycircle.com</a></p>
+                        <p className='my-5'><a className='hover:text-[#FFA500] duration-300' href="mailto:support@example.com"><FontAwesomeIcon icon={faEnvelopeCircleCheck} size='lg' color='#4A90E2' /> support@example.com</a></p>
                         <p><FontAwesomeIcon icon={faPhone} size='lg' color='#4A90E2' /> +91 98765 43210</p>
                     </div>
                     <div className='my-10 lg:my-0'>
