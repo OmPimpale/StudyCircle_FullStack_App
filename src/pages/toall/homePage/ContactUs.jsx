@@ -3,7 +3,7 @@ import contact from '../../../assets/contact.jpg'
 let ContactUs = () => {
     return (
         <>
-            <section className="px-5 lg:px-10 py-16">
+            <section className="px-5 lg:px-10 py-16" id='contactus'>
                 <div>
                     <h2 className="text-center text-[36px] font-bold text-[#1e2a32] pb-10">Contact <span className="text-[#FFA500]">StudyCircle</span></h2>
                     <div className='lg:grid grid-cols-2 gap-16 items-start' >

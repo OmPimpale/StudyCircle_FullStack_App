@@ -60,7 +60,7 @@ let Navbar = () => {
                                 <li className='text-[#4A90E2] hover:text-[#FFA500] duration-300 mx-5'><Link to="/">Home</Link></li>
                                 <li className='text-[#4A90E2] hover:text-[#FFA500] duration-300 mx-5'><Link to="/about">About</Link></li>
                                 <li className='text-[#4A90E2] hover:text-[#FFA500] duration-300 mx-5'><a href="">BecomeTutor</a></li>
-                                <li className='text-[#4A90E2] hover:text-[#FFA500] duration-300 mx-5'><a href="">Contact</a></li>
+                                <li className='text-[#4A90E2] hover:text-[#FFA500] duration-300 mx-5'><a href="#contactus">Contact</a></li>
                                 <motion.li
                                     whileHover={{
                                         color: 'white',
@@ -89,7 +89,7 @@ let Navbar = () => {
                         <li className='text-[#4A90E2] hover:text-[#FFA500] duration-300 m-5'><Link to="/">Home</Link></li>
                         <li className='text-[#4A90E2] hover:text-[#FFA500] duration-300 m-5'><Link to="/about">About</Link></li>
                         <li className='text-[#4A90E2] hover:text-[#FFA500] duration-300 m-5'><a href="">BecomeTutor</a></li>
-                        <li className='text-[#4A90E2] hover:text-[#FFA500] duration-300 m-5'><a href="">Contact</a></li>
+                        <li className='text-[#4A90E2] hover:text-[#FFA500] duration-300 m-5'><a href="#contactus">Contact</a></li>
                         <motion.li
                             whileHover={{
                                 color: 'white',

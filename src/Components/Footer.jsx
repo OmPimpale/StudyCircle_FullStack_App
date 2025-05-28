@@ -12,7 +12,7 @@ let Footer = () => {
                 <div className='lg:grid grid-cols-4 gap-5'>
                     <div>
                         <img className='w-52 mb-6' src={circleLogo2} alt="footerLogo" />
-                        <p className="text-[18px] text-[#5a5a5a]">"StudyCircle connects students with passionate tutors for personalized, empowering 1-on-1 learning.</p>
+                        <p className="text-[18px] text-[#5a5a5a]">"StudyCircle connects students with passionate tutors for personalized, empowering 1 on 1 learning.</p>
                     </div>
                     <div className='my-10 lg:my-0'>
                         <h4 className='text-black font-bold text-2xl mb-6'>Quick Links</h4>
@@ -30,7 +30,7 @@ let Footer = () => {
                             <li className='text-[#4A90E2] hover:text-[#FFA500] duration-300 mx-5'><Link to="/">Home</Link></li>
                             <li className='text-[#4A90E2] hover:text-[#FFA500] duration-300 mx-5'><Link to="/about">About</Link></li>
                             <li className='text-[#4A90E2] hover:text-[#FFA500] duration-300 mx-5'><a href="">BecomeTutor</a></li>
-                            <li className='text-[#4A90E2] hover:text-[#FFA500] duration-300 mx-5'><a href="">Contact</a></li>
+                            <li className='text-[#4A90E2] hover:text-[#FFA500] duration-300 mx-5'><a href="#contactus">Contact</a></li>
                             <motion.li
                                 whileHover={{
                                     color: 'white',
@@ -39,7 +39,7 @@ let Footer = () => {
                                 transition={{
                                     duration: .5
                                 }}
-                                className='text-[#5a5a5a] border-1 border-[#4A90E2] bg-white py-1 px-3 rounded-full mx-5'><a href="">Get Started</a></motion.li>
+                                className='text-[#5a5a5a] border-1 border-[#4A90E2] bg-white py-1 px-3 rounded-full mx-4'><a href="">Get Started</a></motion.li>
                         </motion.ul>
                     </div>
                     <div className='my-10 lg:my-0'>
