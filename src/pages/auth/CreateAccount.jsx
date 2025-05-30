@@ -1,14 +1,21 @@
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router-dom';
 import createAcc from '../../assets/createAcc.jpg'
 import circleLogo2 from '../../assets/circleLogo2.png'
+import { useState } from 'react';
 
-let Login = () => {
+const CreateAccount = () => {
+    const [fullName, setFullName] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
+
+    const navigate = useNavigate();
     return (
         <>
             <section className={`p-5 lg:p-14 bg-contain lg:grid grid-cols-5 gap-2.5 items-center`}>
                 <img src={createAcc} alt="" className='col-span-2 hidden lg:block w-full' />
                 <div className=" col-span-3 rounded">
-                    <div class="w-full xl:w-1/2 p-8 bg-[#f4f4f4] mx-auto rounded-b-lg">
+                    <div className="w-full xl:w-1/2 p-8 bg-[#f4f4f4] mx-auto rounded-b-lg">
                         <div className='text-center mb-3'>
                             <Link to="/" className='inline-block'><img className="text-[36px] font-bold text-[#FFA500] w-32" src={circleLogo2} /></Link>
                         </div>
@@ -28,6 +35,8 @@ let Login = () => {
                                     type="text"
                                     placeholder="Your name"
                                     required
+                                    value={fullName}
+                                    onChange={(e) => setFullName(e.target.value)}
                                 />
                                 <div className='my-6'>
                                     <label
@@ -42,6 +51,8 @@ let Login = () => {
                                         type="text"
                                         placeholder="Your email address"
                                         required
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
                                     />
                                 </div>
                             </div>
@@ -58,6 +69,8 @@ let Login = () => {
                                     type="password"
                                     placeholder="Your password"
                                     required
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
                                 />
                                 {/* <div className='text-end'>
                                     <a
@@ -72,8 +85,9 @@ let Login = () => {
                                 <button
                                     class="w-full bg-[#4A90E2] hover:bg-[#FFA500] duration-300 text-white text-sm py-2 px-4 font-semibold rounded focus:outline-none focus:shadow-outline h-10"
                                     type="button"
+                                    onClick={() => handleSubmit(null, fullName, email, password, setError, navigate)} // Pass event as null since we're not using e.preventDefault() inside
                                 >
-                                    Sign in
+                                    Create Account
                                 </button>
                             </div>
                             <div className="mt-1.5 text-center">
@@ -94,5 +108,29 @@ let Login = () => {
         </>
     )
 }
+const handleSubmit = async (e, fullName, email, password, setError, navigate) => {
+    e.preventDefault();
+    setError(''); // Clear previous errors
 
-export default Login;
+    try {
+        const response = await fetch('/api/auth/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ fullName, username: email, password }),
+        });
+
+        if (response.ok) {
+            navigate('/login'); // Redirect to login on success
+        } else {
+            const errorData = await response.json();
+            setError(errorData.message || 'Account creation failed. Please try again.');
+        }
+    } catch (error) {
+        console.error('Account creation error:', error);
+        setError('An error occurred. Please try again later.');
+    }
+}
+
+export default CreateAccount;

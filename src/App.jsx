@@ -14,6 +14,7 @@ import HelpCenterPage from './pages/toall/HelpCenterPage'
 import EarningsPage from './pages/user/EarningsPage'
 import FeedbackPage from './pages/user/FeedbackPage'
 import TutorProfilePage from './pages/toall/TutorProfilePage'
+import ProtectedRoute from './Components/ProtectedRoute'
 import ResourcesPage from './pages/toall/ResourcesPage'
 
 function App() {
@@ -27,15 +28,15 @@ function App() {
           <Route path='/login' element={<Login />} />
           <Route path='/singUp' element={<CreateAccount />} />
           <Route path='/subjects/:subjectName' element={<SubjectPage />} />
-          <Route path='/dashboard' element={<Dashboard />} />
-          <Route path='/book/:tutorId' element={<BookingPage />} />
-          <Route path='/goals' element={<GoalSettingPage />} />
- <Route path='/progress' element={<ProgressTrackingPage />} />
+          <Route path='/dashboard' element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path='/book/:tutorId' element={<ProtectedRoute><BookingPage /></ProtectedRoute>} />
+          <Route path='/goals' element={<ProtectedRoute><GoalSettingPage /></ProtectedRoute>} />
+ <Route path='/progress' element={<ProtectedRoute><ProgressTrackingPage /></ProtectedRoute>} />
  <Route path='/help' element={<HelpCenterPage />} />
-          <Route path='/feedback' element={<FeedbackPage />} />
-          <Route path='/earnings' element={<EarningsPage />} />
+          <Route path='/feedback' element={<ProtectedRoute><FeedbackPage /></ProtectedRoute>} />
+          <Route path='/earnings' element={<ProtectedRoute><EarningsPage /></ProtectedRoute>} />
           <Route path='/tutors/:tutorId' element={<TutorProfilePage />} />
-          <Route path='/payment' element={<PaymentPage />} />
+          <Route path='/payment' element={<ProtectedRoute><PaymentPage /></ProtectedRoute>} />
           <Route path='/resources' element={<ResourcesPage />} />
         </Routes>
       </BrowserRouter>

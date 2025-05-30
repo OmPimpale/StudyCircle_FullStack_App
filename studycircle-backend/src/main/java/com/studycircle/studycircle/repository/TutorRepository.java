@@ -1,0 +1,9 @@
+package com.studycircle.studycircle.repository;
+
+import com.studycircle.studycircle.model.Tutor;
+import org.springframework.data.jpa.repository.JpaRepository;
+import java.util.List;
+
+public interface TutorRepository extends JpaRepository<Tutor, Long> {
+    List<Tutor> findBySubjectsName(String subjectName);
+}

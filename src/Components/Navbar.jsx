@@ -2,10 +2,15 @@ import circleLogo2 from '../assets/circleLogo2.png'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBarsStaggered } from '@fortawesome/free-solid-svg-icons';
 import { motion } from 'motion/react'
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import { useState } from 'react';
 
 let Navbar = () => {
+
+    const handleLogout = () => {
+        localStorage.removeItem('jwtToken'); // Remove the JWT from localStorage
+        navigate('/login'); // Redirect to the login page
+    };
 
     const [toggleNav, setToggleNav] = useState('true');
 
@@ -74,7 +79,7 @@ let Navbar = () => {
                         </div>
                     </div>
                 </div>
-                <div className={`mt-5 text-center border-t-[0.5px] border-[#5a5a5a] ${toggleNav ? 'hidden' : 'block'}` }>
+                <div className={`mt-5 text-center border-t-[0.5px] border-[#5a5a5a] ${toggleNav ? 'hidden' : 'block'}`}>
                     <motion.ul
                         initial={{
                             opacity: 0
