@@ -24,21 +24,17 @@ public class Booking {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "student_id")
+ @ManyToOne
+    @JoinColumn(name = "student_id", nullable = false)
     private Student student;
 
     @ManyToOne
-    @JoinColumn(name = "tutor_id")
+    @JoinColumn(name = "tutor_id", nullable = false)
     private Tutor tutor;
 
     @ManyToOne
     @JoinColumn(name = "subject_id")
     private Subject subject;
-
-    private LocalDate date;
-
-    private LocalTime time;
 
     private String status; // e.g., "Pending", "Confirmed", "Completed", "Cancelled"
 
@@ -47,6 +43,12 @@ public class Booking {
     @OneToOne(mappedBy = "booking")
     private Payment payment;
 
+    @ManyToOne
+    @JoinColumn(name = "session_id", nullable = false)
+    private Session session;
+
+    private String paymentStatus; // e.g., "PENDING", "COMPLETED"
+
     @Column(nullable = false, updatable = false)
     @CreationTimestamp
     private LocalDateTime createdAt;
@@ -54,4 +56,7 @@ public class Booking {
     @Column(nullable = false)
     @UpdateTimestamp
  private LocalDateTime updatedAt;
+
+    @Column(nullable = false)
+    private LocalDateTime bookingTime;
 }

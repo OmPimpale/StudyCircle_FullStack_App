@@ -6,7 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/tutors")
@@ -43,13 +45,16 @@ public class TutorController {
         }
     }
 
-    @GetMapping("/subject")
-    public ResponseEntity<List<Tutor>> getTutorsBySubjectName(@RequestParam("subjectName") String subjectName) {
-        List<Tutor> tutors = tutorService.findTutorsBySubjectName(subjectName);
-        if (tutors.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND); // Or HttpStatus.OK with an empty list
-        }
+    @GetMapping("/search")
+    public ResponseEntity<List<Tutor>> searchTutorsBySubject(@RequestParam("subject") String subject) {
+        List<Tutor> tutors = tutorService.findTutorsBySubject(subject);
         return new ResponseEntity<>(tutors, HttpStatus.OK);
+    }
+
+    @GetMapping("/{tutorId}/available-slots")
+    public ResponseEntity<Map<LocalDate, List<String>>> getAvailableSlots(@PathVariable Long tutorId, @RequestParam(value = "date", required = false) LocalDate date) {
+        Map<LocalDate, List<String>> availableSlots = tutorService.getAvailableSlots(tutorId, date);
+        return new ResponseEntity<>(availableSlots, HttpStatus.OK);
     }
     // Add other controller methods as needed
 }

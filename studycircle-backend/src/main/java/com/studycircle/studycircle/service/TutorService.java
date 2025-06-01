@@ -1,12 +1,16 @@
 package com.studycircle.studycircle.service;
 
+import com.studycircle.studycircle.dto.AvailableTimeSlot;
 import com.studycircle.studycircle.model.Tutor;
 import com.studycircle.studycircle.repository.TutorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
-
 @Service
 public class TutorService {
 
@@ -59,9 +63,25 @@ public class TutorService {
         return null; // Or throw an exception
     }
 
-
-    public List<Tutor> findTutorsBySubjectName(String subjectName) {
-        return tutorRepository.findBySubjectsName(subjectName);
+    public List<Tutor> findTutorsBySubject(String subject) {
+ return tutorRepository.findBySubjectsName(subject);
     }
-    // Add other service methods as needed
+
+    public List<AvailableTimeSlot> getAvailableTimeSlots(Long tutorId, LocalDate date) {
+        // TODO: Implement logic to retrieve the tutor's scheduled sessions for the given date
+        // You'll need to inject the SessionRepository and query for sessions by tutorId and date range
+        // For example: List<Session> scheduledSessions = sessionRepository.findByTutorIdAndStartTimeBetween(tutorId, date.atStartOfDay(), date.plusDays(1).atStartOfDay());
+
+        // TODO: Implement logic to retrieve the tutor's general availability for the given date (e.g., from a field in Tutor or a separate entity)
+        // Tutor tutor = tutorRepository.findById(tutorId).orElseThrow(() -> new EntityNotFoundException("Tutor not found"));
+        // GeneralAvailability generalAvailability = tutor.getGeneralAvailabilityForDate(date);
+
+        // TODO: Calculate the available time slots by comparing general availability and scheduled sessions
+        // This will involve iterating through the general availability time ranges and subtracting the scheduled session times
+        // You'll need to define what a "time slot" is (e.g., 30 minutes, 1 hour) and generate slots accordingly.
+
+        // Return a list of AvailableTimeSlot DTOs
+        return null; // Placeholder return
+    }
+
 }

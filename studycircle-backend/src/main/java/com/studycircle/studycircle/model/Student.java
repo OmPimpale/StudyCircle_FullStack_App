@@ -29,6 +29,9 @@ public class Student {
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 
+    @Column
+    private String academicLevel;
+
     // Add any additional student-specific fields here in the future
 
 }

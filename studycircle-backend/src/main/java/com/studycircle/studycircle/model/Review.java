@@ -4,8 +4,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-import org.hibernate.annotations.CreationTimestamp;
-
 import java.time.LocalDateTime;
 @Table(name = "reviews")
 @Getter
@@ -23,8 +21,16 @@ public class Review {
     private Booking booking;
 
     @ManyToOne(fetch = FetchType.LAZY)
+ @JoinColumn(name = "session_id", nullable = false)
+ private Session session;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "student_id", nullable = false)
     private Student student;
+
+ @ManyToOne(fetch = FetchType.LAZY)
+ @JoinColumn(name = "user_id", nullable = false) // User who wrote the review
+ private User user;
 
     @Column(nullable = false)
     private Integer rating; // e.g., 1 to 5
@@ -32,10 +38,6 @@ public class Review {
     @Column(columnDefinition = "TEXT")
     private String comment;
 
-    @CreationTimestamp
- @Column(name = "review_timestamp")
- private LocalDateTime reviewTimestamp;
-
-    @Column(name = "is_public")
-    private boolean isPublic;
+ @Column(name = "review_date")
+ private LocalDateTime reviewDate;
 }

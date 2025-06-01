@@ -4,13 +4,12 @@ import com.studycircle.studycircle.model.Review;
 import com.studycircle.studycircle.service.ReviewService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 @RestController
@@ -25,16 +24,44 @@ public class ReviewController {
     }
 
     // Add API endpoints for reviews here
-    @PostMapping
+ @PostMapping
     public ResponseEntity<Review> addReview(@RequestBody Review review) {
-        Review createdReview = reviewService.addReview(review);
+        Review createdReview = reviewService.createNewReview(review);
         return new ResponseEntity<>(createdReview, HttpStatus.CREATED);
     }
 
-    @GetMapping("/tutor/{tutorId}")
-    public ResponseEntity<List<Review>> getReviewsByTutorId(@PathVariable Long tutorId) {
-        List<Review> reviews = reviewService.findReviewsByTutorId(tutorId);
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<String> handleEntityNotFoundException(EntityNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
+
+ @GetMapping("/session/{sessionId}")
+    public ResponseEntity<Page<Review>> getReviewsForSession(@PathVariable Long sessionId, Pageable pageable) {
+ Page<Review> reviews = reviewService.getReviewsForSession(sessionId, pageable);
+ return new ResponseEntity<>(reviews, HttpStatus.OK);
+    }
+
+ @GetMapping("/user/{userId}")
+    public ResponseEntity<Page<Review>> getReviewsByUserId(@PathVariable Long userId, Pageable pageable) {
+ Page<Review> reviews = reviewService.getReviewsByUserId(userId, pageable);
         return new ResponseEntity<>(reviews, HttpStatus.OK);
+    }
+
+ @PutMapping("/{id}")
+    public ResponseEntity<Review> updateReview(@PathVariable Long id, @RequestBody Review updatedReview) {
+ Review review = reviewService.updateReview(id, updatedReview);
+        return new ResponseEntity<>(review, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteReview(@PathVariable Long id) {
+        reviewService.deleteReview(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
 }

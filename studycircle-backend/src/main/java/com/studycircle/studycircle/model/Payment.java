@@ -21,26 +21,12 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne
-    @JoinColumn(name = "booking_id")
-    private Booking booking;
-
-    @Column(nullable = false)
-    private BigDecimal amount;
-
     @Column(name = "transaction_id")
     private String transactionId;
 
-    @Column(nullable = false)
-    private String status;
+ @Column(nullable = false)
+ private double amount;
+ @Column(nullable = false)
+ private LocalDateTime paymentDate;
 
-    @Column(name = "payment_date", nullable = false)
-    private LocalDateTime paymentDate;
-
-    @Column(name = "payment_method")
-    private String paymentMethod;
-
-    private BigDecimal fees;
-
-    // Lombok will generate getters, setters, and constructors
 }

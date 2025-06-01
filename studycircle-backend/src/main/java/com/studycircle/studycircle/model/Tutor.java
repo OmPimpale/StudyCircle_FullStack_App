@@ -19,6 +19,10 @@ public class Tutor {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private String subjectsTaught;
+
+    private double hourlyRate;
+
     private String qualifications;
 
     private String experience;
@@ -31,7 +35,4 @@ public class Tutor {
 
     private String profilePictureUrl;
 
-    @ManyToMany
-    @JoinTable(name = "tutor_subjects", joinColumns = @JoinColumn(name = "tutor_id"), inverseJoinColumns = @JoinColumn(name = "subject_id"))
-    private Set<Subject> subjects;
 }

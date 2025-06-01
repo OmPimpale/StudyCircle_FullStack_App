@@ -19,18 +19,12 @@ public class Resource {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String title;
+    private String fileName;
 
-    private String filePath;
+    private String fileType;
 
-    @ManyToOne
-    @JoinColumn(name = "subject_id")
-    private Subject subject;
-
-    private String resourceType; // e.g., "PDF", "Video", "Link"
-
-    @Column(columnDefinition = "TEXT")
-    private String description;
+    @Column(nullable = false)
+    private String url;
 
     @ManyToOne
     @JoinColumn(name = "uploader_id")
@@ -38,4 +32,8 @@ public class Resource {
 
     @CreationTimestamp
     private java.time.LocalDateTime uploadTimestamp;
+
+ @ManyToOne
+ @JoinColumn(name = "session_id")
+ private Session session;
 }
