@@ -58,4 +58,19 @@ public class UserController {
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<Void> initiatePasswordReset(@RequestBody String email) {
+        boolean success = userService.initiatePasswordReset(email);
+        if (success) {
+            return new ResponseEntity<>(HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND); // Or another suitable status
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<Void> confirmPasswordReset(@RequestBody ResetPasswordRequest resetPasswordRequest) {
+        boolean success = userService.confirmPasswordReset(resetPasswordRequest.getToken(), resetPasswordRequest.getNewPassword());
+        return success ? new ResponseEntity<>(HttpStatus.OK) : new ResponseEntity<>(HttpStatus.BAD_REQUEST); // Or another suitable status
+    }
 }

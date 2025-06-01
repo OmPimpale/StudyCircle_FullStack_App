@@ -5,6 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -26,5 +29,26 @@ public class User {
 
     @Column(nullable = false)
     private String role; // e.g., "STUDENT", "TUTOR"
+
+    @Column(nullable = false, unique = true)
+    private String email;
+
+    @Column
+    private String firstName;
+
+    @Column
+    private String lastName;
+
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
+
+    @Column
+    private String resetPasswordToken;
+
+    @Column
+    private LocalDateTime resetPasswordExpiry;
 
 }

@@ -3,6 +3,8 @@ package com.studycircle.studycircle.model;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.hibernate.annotations.CreationTimestamp;
+
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
@@ -24,4 +26,16 @@ public class Resource {
     @ManyToOne
     @JoinColumn(name = "subject_id")
     private Subject subject;
+
+    private String resourceType; // e.g., "PDF", "Video", "Link"
+
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
+    @ManyToOne
+    @JoinColumn(name = "uploader_id")
+    private User uploader;
+
+    @CreationTimestamp
+    private java.time.LocalDateTime uploadTimestamp;
 }

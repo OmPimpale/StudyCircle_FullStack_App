@@ -6,8 +6,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "bookings")
@@ -39,4 +42,16 @@ public class Booking {
 
     private String status; // e.g., "Pending", "Confirmed", "Completed", "Cancelled"
 
+    private Integer duration; // Duration in minutes
+
+    @OneToOne(mappedBy = "booking")
+    private Payment payment;
+
+    @Column(nullable = false, updatable = false)
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+
+    @Column(nullable = false)
+    @UpdateTimestamp
+ private LocalDateTime updatedAt;
 }

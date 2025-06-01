@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.math.BigDecimal;
 
 @Entity
@@ -33,6 +34,13 @@ public class Payment {
     @Column(nullable = false)
     private String status;
 
-    // Lombok will generate getters, setters, and constructors
+    @Column(name = "payment_date", nullable = false)
+    private LocalDateTime paymentDate;
 
+    @Column(name = "payment_method")
+    private String paymentMethod;
+
+    private BigDecimal fees;
+
+    // Lombok will generate getters, setters, and constructors
 }

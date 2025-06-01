@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
+import org.hibernate.annotations.CreationTimestamp;
+
+import java.time.LocalDateTime;
 @Table(name = "reviews")
 @Getter
 @Setter
@@ -28,4 +31,11 @@ public class Review {
 
     @Column(columnDefinition = "TEXT")
     private String comment;
+
+    @CreationTimestamp
+ @Column(name = "review_timestamp")
+ private LocalDateTime reviewTimestamp;
+
+    @Column(name = "is_public")
+    private boolean isPublic;
 }

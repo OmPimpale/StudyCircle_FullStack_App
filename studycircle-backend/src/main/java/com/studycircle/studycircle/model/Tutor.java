@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Set;
+
 @Entity
 @Getter
 @Setter
@@ -24,4 +26,12 @@ public class Tutor {
     @OneToOne
     @JoinColumn(name = "user_id")
     private User user;
+
+    private String bio;
+
+    private String profilePictureUrl;
+
+    @ManyToMany
+    @JoinTable(name = "tutor_subjects", joinColumns = @JoinColumn(name = "tutor_id"), inverseJoinColumns = @JoinColumn(name = "subject_id"))
+    private Set<Subject> subjects;
 }

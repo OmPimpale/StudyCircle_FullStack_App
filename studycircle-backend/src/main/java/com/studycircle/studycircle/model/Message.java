@@ -24,14 +24,21 @@ public class Message {
     @Column(nullable = false)
     private LocalDateTime timestamp;
 
+ @Column(nullable = false)
+ private boolean read = false;
+
     public Message() {
     }
 
-    public Message(User sender, User recipient, String content, LocalDateTime timestamp) {
+    public Message(User sender, User recipient, String content, LocalDateTime timestamp, boolean read) {
         this.sender = sender;
         this.recipient = recipient;
         this.content = content;
         this.timestamp = timestamp;
+ this.read = read;
+    }
+
+    public Message(User sender, User recipient, String content, LocalDateTime timestamp) {
     }
 
     public Long getId() {
@@ -126,5 +133,13 @@ public class Message {
 
     public void setTimestamp(LocalDateTime timestamp) {
         this.timestamp = timestamp;
+    }
+
+    public boolean isRead() {
+ return read;
+    }
+
+    public void setRead(boolean read) {
+ this.read = read;
     }
 }
