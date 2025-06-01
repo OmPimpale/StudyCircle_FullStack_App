@@ -44,21 +44,21 @@ let Navbar = () => {
                                 className='w-24' src={circleLogo2} alt="Logo" />
                         </Link>
                     </div>
-                    <div className='flex items-center'>
-                        {/* Mobile menu button */}
-                            initial={{
-                                opacity: 0
-                            }}
-                            animate={{
-                                opacity: 1
-                            }}
-                            transition={{
-                                duration: 1
-                            }}
-                            className='lg:hidden'>
-                             <button onClick={() => setToggleNav(!toggleNav)} className="text-gray-600 hover:text-[#4A90E2] focus:outline-none">
-                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={toggleNav ? "M4 6h16M4 12h16M4 18h16" : "M6 18L18 6M6 6l12 12"}></path></svg>
-                            </button>
+                    <motion.div className='flex items-center lg:hidden'
+                        initial={{
+                            opacity: 0
+                        }}
+                        animate={{
+                            opacity: 1
+                        }}
+                        transition={{
+                            duration: .75,
+                            ease: "linear"
+                        }}
+                    >
+                        <button onClick={() => setToggleNav(!toggleNav)} className="text-gray-600 hover:text-[#4A90E2] focus:outline-none">
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={toggleNav ? "M4 6h16M4 12h16M4 18h16" : "M6 18L18 6M6 6l12 12"}></path></svg>
+                        </button>
                         {/* Desktop navigation */}
                         <nav className='hidden lg:block'>
                             <motion.ul
@@ -74,8 +74,8 @@ let Navbar = () => {
                                 <li className='text-gray-700 hover:text-[#4A90E2] duration-300'><Link to="/">Home</Link></li>
                                 <li className='text-gray-700 hover:text-[#4A90E2] duration-300'><Link to="/sessions">Sessions</Link></li> {/* Assuming you have a Sessions page */}
                                 <li className='text-gray-700 hover:text-[#4A90E2] duration-300'><Link to="/tutors">Find a Tutor</Link></li> {/* Assuming you have a Tutors page */}
-                                <li className='text-[#4A90E2] hover:text-[#FFA500] duration-300 mx-5'><a href="">BecomeTutor</a></li>
-                                <li className='text-[#4A90E2] hover:text-[#FFA500] duration-300 mx-5'><a href="#contactus">Contact</a></li>
+                                <li className='text-[#4A90E2] hover:text-[#FFA500] duration-300'><a href="">BecomeTutor</a></li>
+                                <li className='text-[#4A90E2] hover:text-[#FFA500] duration-300'><a href="#contactus">Contact</a></li>
 
                                 {isAuthenticated ? (
                                     <motion.li
@@ -93,18 +93,74 @@ let Navbar = () => {
                                     </motion.li>
                                 ) : (
                                     <motion.li
-                                    whileHover={{
-                                        color: 'white',
-                                        backgroundColor: '#4A90E2'
-                                    }}
-                                    transition={{
-                                        duration: .5
-                                    }} className='text-gray-700 border border-[#4A90E2] bg-white py-1 px-3 rounded-full hover:bg-[#4A90E2] hover:text-white transition-colors duration-300'><Link to="/login">Get Started</Link></motion.li>
+                                        whileHover={{
+                                            color: 'white',
+                                            backgroundColor: '#4A90E2'
+                                        }}
+                                        transition={{
+                                            duration: .5
+                                        }} className='text-gray-700 border border-[#4A90E2] bg-white py-1 px-3 rounded-full hover:bg-[#4A90E2] hover:text-white transition-colors duration-300'><Link to="/login">Get Started</Link></motion.li>
                                 )}
                             </motion.ul>
                         </nav>
                     </motion.div>
-                    </div>
+                    <motion.div className='hidden lg:flex'
+                        initial={{
+                            opacity: 0
+                        }}
+                        animate={{
+                            opacity: 1
+                        }}
+                        transition={{
+                            duration: .75,
+                            ease: "linear"
+                        }}
+                    >
+                        {/* Desktop navigation */}
+                        <nav className='hidden lg:block'>
+                            <motion.ul
+                                initial={{
+                                    opacity: 0
+                                }}
+                                animate={{
+                                    opacity: 1
+                                }}
+                                transition={{
+                                    duration: 1
+                                }} className='flex items-center font-medium space-x-6'>
+                                <li className='text-gray-700 hover:text-[#4A90E2] duration-300'><Link to="/">Home</Link></li>
+                                <li className='text-gray-700 hover:text-[#4A90E2] duration-300'><Link to="/sessions">Sessions</Link></li> {/* Assuming you have a Sessions page */}
+                                <li className='text-gray-700 hover:text-[#4A90E2] duration-300'><Link to="/tutors">Find a Tutor</Link></li> {/* Assuming you have a Tutors page */}
+                                <li className='text-[#4A90E2] hover:text-[#FFA500] duration-300'><a href="">BecomeTutor</a></li>
+                                <li className='text-[#4A90E2] hover:text-[#FFA500] duration-300'><a href="#contactus">Contact</a></li>
+
+                                {isAuthenticated ? (
+                                    <motion.li
+                                        whileHover={{
+                                            color: 'white',
+                                            backgroundColor: '#4A90E2'
+                                        }}
+                                        transition={{
+                                            duration: .5
+                                        }}
+                                        className='text-gray-700 border border-[#4A90E2] bg-white py-1 px-3 rounded-full cursor-pointer hover:bg-[#4A90E2] hover:text-white transition-colors duration-300'
+                                        onClick={logout} // Call the logout function
+                                    >
+                                        Logout
+                                    </motion.li>
+                                ) : (
+                                    <motion.li
+                                        whileHover={{
+                                            backgroundColor: '#4A90E2',
+                                            color: 'white',
+                                        }}
+                                        transition={{
+                                            duration: .5
+                                        }} className='text-gray-700 border border-[#4A90E2] bg-white py-1 px-3 rounded-full hover:bg-[#4A90E2] hover:text-white transition-colors duration-300'><Link to="/login">Get Started</Link></motion.li>
+                                )}
+                            </motion.ul>
+                        </nav>
+                    </motion.div>
                 </div>
                 <div className={`mt-5 text-center border-t-[0.5px] border-[#5a5a5a] ${toggleNav ? 'hidden' : 'block'}`}>
                     <motion.ul
@@ -120,31 +176,31 @@ let Navbar = () => {
                         <li className='text-gray-700 hover:text-[#4A90E2] duration-300'><Link to="/">Home</Link></li>
                         <li className='text-gray-700 hover:text-[#4A90E2] duration-300'><Link to="/sessions">Sessions</Link></li>
                         <li className='text-gray-700 hover:text-[#4A90E2] duration-300'><Link to="/tutors">Find a Tutor</Link></li>
-                        <li className='text-[#4A90E2] hover:text-[#FFA500] duration-300 m-5'><a href="">BecomeTutor</a></li>
-                        <li className='text-[#4A90E2] hover:text-[#FFA500] duration-300 m-5'><a href="#contactus">Contact</a></li>{isAuthenticated ? (
-                                    <motion.li
-                                        whileHover={{
-                                            color: 'white',
-                                            backgroundColor: '#4A90E2'
-                                        }}
-                                        transition={{
-                                            duration: .5
-                                        }}
-                                        className='text-gray-700 border border-[#4A90E2] bg-white py-1 px-3 rounded-full mx-auto w-[109px] cursor-pointer hover:bg-[#4A90E2] hover:text-white transition-colors duration-300'
-                                        onClick={logout} // Call the logout function
-                                    >
-                                        Logout
-                                    </motion.li>
-                                ) : (
-                                    <motion.li
-                                    whileHover={{
-                                        color: 'white',
-                                        backgroundColor: '#4A90E2'
-                                    }}
-                                    transition={{
-                                        duration: .5
-                                    }} className='text-gray-700 border border-[#4A90E2] bg-white py-1 px-3 rounded-full mx-auto w-[109px] hover:bg-[#4A90E2] hover:text-white transition-colors duration-300'><Link to="/login">Get Started</Link></motion.li>
-                                )}
+                        <li className='text-[#4A90E2] hover:text-[#FFA500] duration-300'><a href="">BecomeTutor</a></li>
+                        <li className='text-[#4A90E2] hover:text-[#FFA500] duration-300'><a href="#contactus">Contact</a></li>{isAuthenticated ? (
+                            <motion.li
+                                whileHover={{
+                                    backgroundColor: '#4A90E2',
+                                    color: 'white',
+                                }}
+                                transition={{
+                                    duration: .5
+                                }}
+                                className='text-gray-700 border border-[#4A90E2] bg-white py-1 px-3 rounded-full mx-auto w-[109px] cursor-pointer hover:bg-[#4A90E2] hover:text-white transition-colors duration-300'
+                                onClick={logout} // Call the logout function
+                            >
+                                Logout
+                            </motion.li>
+                        ) : (
+                            <motion.li
+                                whileHover={{
+                                    color: 'white',
+                                    backgroundColor: '#4A90E2'
+                                }}
+                                transition={{
+                                    duration: .5
+                                }} className='text-gray-700 border border-[#4A90E2] bg-white py-1 px-3 rounded-full mx-auto w-[109px] hover:bg-[#4A90E2] hover:text-white transition-colors duration-300'><Link to="/login">Get Started</Link></motion.li>
+                        )}
                     </motion.ul>
                 </div>
             </section>

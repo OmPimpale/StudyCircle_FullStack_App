@@ -62,7 +62,7 @@ let HeroSection = () => {
                             transition={{
                                 duration: .5
                             }}
-                            className="text-white text-[18px] border-1 border-[#4A90E2] bg-[#4A90E2] py-1.5 rounded-full me-7">
+                            className="text-white text-[18px] border-1 border-[#4A90E2] bg-[#4A90E2] py-1.5 rounded-full md:me-7 mb-2.5 md:mb-0 me-[14px]">
                             <Link to="/singUp" className='py-1.5 px-7'>Tutor <FontAwesomeIcon icon={faPersonChalkboard} size="lg" /></Link>
                         </motion.button>
                         <motion.button

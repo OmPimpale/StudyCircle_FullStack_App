@@ -1,7 +1,7 @@
-jsx
 import React from 'react';
-import Navbar from '../Components/Navbar'; // Adjust the import path as needed
-import Footer from '../Components/Footer'; // Adjust the import path as needed
+import Navbar from '../../Components/Navbar';
+import Footer from '../../Components/Footer';
+
 
 function BookingPage() {
   // In a real application, you would likely get the tutor ID from URL parameters

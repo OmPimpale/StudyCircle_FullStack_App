@@ -1,10 +1,10 @@
-jsx
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import Navbar from '../Components/Navbar'; // Adjust the import path as necessary
-import Footer from '../Components/Footer'; // Adjust the import path as necessary
+import { useParams, useNavigate } from 'react-router';
+
 import authenticatedFetch from '../../utils/authenticatedFetch'; // Adjust the path
-import { useAuth } from '../../hooks/useAuth'; // Assuming you have the useAuth hook
+import Navbar from '../../Components/Navbar';
+import Footer from '../../Components/Footer';
+import useAuth from '../../hooks/useAuth';
 
 
 function PaymentPage() {

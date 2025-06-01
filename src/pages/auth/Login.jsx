@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router";
 import { useState } from 'react';
 import login2 from "../../assets/login2.jpg";
 import circleLogo2 from '../../assets/circleLogo2.png'
@@ -111,7 +111,7 @@ let Login = () => {
                                 className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full disabled:opacity-50 disabled:cursor-not-allowed"
                                 type="submit"
                                 disabled={loading}
-                                >
+                            >
                                 {loading ? 'Logging In...' : 'Sign In'}
                             </button>
                         </div>
@@ -129,8 +129,8 @@ let Login = () => {
                         </div>
                     </form>
                 </div>
-            </section>
-        </>
+            </div>
+        </section>
     );
 }
 

@@ -1,7 +1,6 @@
-jsx
 import React from 'react';
-import Navbar from '../Components/Navbar'; // Assuming Navbar is in this path
-import Footer from '../Components/Footer'; // Assuming Footer is in this path
+import Navbar from '../../Components/Navbar';
+import Footer from '../../Components/Footer';
 
 function FeedbackPage() {
   return (

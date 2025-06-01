@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import Navbar from '../Components/Navbar'; // Adjust the import path as needed
-import Footer from '../Components/Footer'; // Adjust the import path as needed
+import Navbar from '../../Components/Navbar';
+import Footer from '../../Components/Footer';
+
 
 function GoalSettingPage() {
   const [goals, setGoals] = useState([]);

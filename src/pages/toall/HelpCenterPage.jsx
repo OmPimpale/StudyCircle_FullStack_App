@@ -1,7 +1,7 @@
-jsx
 import React from 'react';
-import Navbar from '../Components/Navbar'; // Adjust the import path as necessary
-import Footer from '../Components/Footer'; // Adjust the import path as necessary
+import Navbar from '../../Components/Navbar';
+import Footer from '../../Components/Footer';
+
 
 function HelpCenterPage() {
   return (

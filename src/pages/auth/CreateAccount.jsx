@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router';
 import createAcc from '../../assets/createAcc.jpg'
 import circleLogo2 from '../../assets/circleLogo2.png'
 import { useState } from 'react';

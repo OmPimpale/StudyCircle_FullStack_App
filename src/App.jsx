@@ -31,8 +31,8 @@ function App() {
           <Route path='/dashboard' element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path='/book/:tutorId' element={<ProtectedRoute><BookingPage /></ProtectedRoute>} />
           <Route path='/goals' element={<ProtectedRoute><GoalSettingPage /></ProtectedRoute>} />
- <Route path='/progress' element={<ProtectedRoute><ProgressTrackingPage /></ProtectedRoute>} />
- <Route path='/help' element={<HelpCenterPage />} />
+          <Route path='/progress' element={<ProtectedRoute><ProgressTrackingPage /></ProtectedRoute>} />
+          <Route path='/help' element={<HelpCenterPage />} />
           <Route path='/feedback' element={<ProtectedRoute><FeedbackPage /></ProtectedRoute>} />
           <Route path='/earnings' element={<ProtectedRoute><EarningsPage /></ProtectedRoute>} />
           <Route path='/tutors/:tutorId' element={<TutorProfilePage />} />

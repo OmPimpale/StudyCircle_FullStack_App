@@ -1,7 +1,5 @@
-jsx
 import React from 'react';
-import Navbar from '../Components/Navbar'; // Adjust the import path as needed
-import Footer from '../Components/Footer'; // Adjust the import path as needed
+
 
 function ResourcesPage() {
   return (
