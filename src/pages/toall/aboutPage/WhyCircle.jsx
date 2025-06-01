@@ -1,5 +1,6 @@
 import { faSquareCheck } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Link } from "react-router";
 
 let WhyCircle = () => {
     return (
@@ -30,8 +31,8 @@ let WhyCircle = () => {
                                 <li>Safe, verified, and supportive community</li>
                             </div>
                         </ul>
-                        <div>
-                            <button className="mt-10 text-white text-[18px] bg-[#4A90E2] py-2 px-7 rounded-full hover:bg-[#ffa500] duration-[.4s]">Start Learning Today</button>
+                        <div className="mt-12 lg:mt-20">
+                            <Link to="/singUp" className="text-white text-[18px] bg-[#4A90E2] py-2 px-7 rounded-full hover:bg-[#ffa500] duration-[.4s]">Start Learning Today</Link>
                         </div>
                     </div>
                 </div>

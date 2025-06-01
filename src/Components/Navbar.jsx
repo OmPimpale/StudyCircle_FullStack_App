@@ -99,7 +99,7 @@ let Navbar = () => {
                                         }}
                                         transition={{
                                             duration: .5
-                                        }} className='text-gray-700 border border-[#4A90E2] bg-white py-1 px-3 rounded-full hover:bg-[#4A90E2] hover:text-white transition-colors duration-300'><Link to="/login">Get Started</Link></motion.li>
+                                        }} className='text-gray-700 border border-[#4A90E2] bg-white py-1 px-3 rounded-full hover:bg-[#4A90E2] hover:text-white transition-colors duration-300'><Link to="/singUp">Get Started</Link></motion.li>
                                 )}
                             </motion.ul>
                         </nav>
@@ -156,7 +156,7 @@ let Navbar = () => {
                                         }}
                                         transition={{
                                             duration: .5
-                                        }} className='text-gray-700 border border-[#4A90E2] bg-white py-1 px-3 rounded-full hover:bg-[#4A90E2] hover:text-white transition-colors duration-300'><Link to="/login">Get Started</Link></motion.li>
+                                        }} className='text-gray-700 border border-[#4A90E2] bg-white py-1 px-3 rounded-full hover:bg-[#4A90E2] hover:text-white transition-colors duration-300'><Link to="/singUp">Get Started</Link></motion.li>
                                 )}
                             </motion.ul>
                         </nav>

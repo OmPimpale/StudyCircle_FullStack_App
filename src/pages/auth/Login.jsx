@@ -47,15 +47,15 @@ let Login = () => {
 
     };
     return (
-        <section className="flex items-center justify-center min-h-screen bg-gray-100 p-4 lg:p-8" style={{ backgroundImage: `url(${login2})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
+        <section className="flex items-center justify-center min-h-screen bg-[#f4f4f4] p-4 lg:p-8">
             <div className="flex flex-col lg:flex-row w-full max-w-4xl bg-white rounded-lg shadow-lg overflow-hidden">
                 {/* Image Section (Hidden on small screens) */}
-                <div className="hidden lg:block lg:w-1/2">
+                <div className="hidden lg:block lg:w-1/2 p-5">
                     <img src={login2} alt="Login Background" className="w-full h-full object-cover" />
                 </div>
 
                 {/* Login Form Section */}
-                <div className="w-full lg:w-1/2 p-6 sm:p-8">
+                <div className="w-full lg:w-1/2 p-5 sm:p-8">
                     <div className="text-center mb-6">
                         <Link to="/" className="inline-block">
                             <img className="w-28 mx-auto" src={circleLogo2} alt="Circle Logo" />
@@ -100,7 +100,7 @@ let Login = () => {
                                 onChange={(e) => setPassword(e.target.value)}
                             />
                             <div className="text-right">
-                                <a className="inline-block align-baseline text-sm text-blue-500 hover:text-blue-800" href="#">
+                                <a className="inline-block align-baseline text-sm text-blue-500 hover:text-[#FFA500]" href="#">
                                     Forgot Password?
                                 </a>
                             </div>
@@ -108,7 +108,7 @@ let Login = () => {
 
                         <div className="flex items-center justify-between mb-4">
                             <button
-                                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="w-full bg-[#4A90E2] hover:bg-[#FFA500] duration-300 text-white text-sm py-2 px-4 font-semibold rounded focus:outline-none focus:shadow-outline h-10 disabled:opacity-50 disabled:cursor-not-allowed"
                                 type="submit"
                                 disabled={loading}
                             >
@@ -118,11 +118,8 @@ let Login = () => {
 
                         <div className="text-center">
                             <p className="text-gray-600 text-sm">
-                                Don't have an account?{' '}
-                                <Link to="/signup" className="text-blue-500 hover:text-blue-800 font-bold">
-                                    Don't have an account?
-                                </Link>{' '}
-                                <Link to="/signup" className="text-blue-500 hover:text-blue-800 font-bold">
+                                Don't have an account?
+                                <Link to="/singUp" className="text-[#1e2a38] hover:text-[#FFA500] text-sm font-semibold ms-1">
                                     Sign Up
                                 </Link>
                             </p>

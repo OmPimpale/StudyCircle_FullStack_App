@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEnvelopeCircleCheck, faLocationDot, faPhone } from '@fortawesome/free-solid-svg-icons';
 import { faSquareInstagram, faSquareGithub, faLinkedin } from '@fortawesome/free-brands-svg-icons';
-import { Link } from 'react-router';
+import { Link, Links } from 'react-router';
 
 let Footer = () => {
     return (
@@ -29,7 +29,7 @@ let Footer = () => {
                             className='flex flex-col items-start font-medium gap-3'>
                             <li className='text-[#4A90E2] hover:text-[#FFA500] duration-300 mx-5'><Link to="/">Home</Link></li>
                             <li className='text-[#4A90E2] hover:text-[#FFA500] duration-300 mx-5'><Link to="/about">About</Link></li>
-                            <li className='text-[#4A90E2] hover:text-[#FFA500] duration-300 mx-5'><a href="">BecomeTutor</a></li>
+                            <li className='text-[#4A90E2] hover:text-[#FFA500] duration-300 mx-5'><Link to="singUp">BecomeTutor</Link></li>
                             <li className='text-[#4A90E2] hover:text-[#FFA500] duration-300 mx-5'><a href="#contactus">Contact</a></li>
                             <motion.li
                                 whileHover={{
@@ -39,7 +39,7 @@ let Footer = () => {
                                 transition={{
                                     duration: .5
                                 }}
-                                className='text-[#5a5a5a] border-1 border-[#4A90E2] bg-white py-1 px-3 rounded-full mx-4'><a href="">Get Started</a></motion.li>
+                                className='text-[#5a5a5a] border-1 border-[#4A90E2] bg-white py-1 px-3 rounded-full mx-4'><Link to="/login">Get Started</Link></motion.li>
                         </motion.ul>
                     </div>
                     <div className='my-10 lg:my-0'>
