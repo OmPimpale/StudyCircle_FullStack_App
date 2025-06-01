@@ -1,4 +1,4 @@
-package com.studycircle.studycircle.controller;
+okpackage com.studycircle.studycircle.controller;
 
 import com.studycircle.studycircle.model.Session;
 import com.studycircle.studycircle.model.Resource;
@@ -14,7 +14,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.time.LocalDateTime;
 import java.time.LocalDate;
 
 @RestController
@@ -100,13 +100,16 @@ public class SessionController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<Session>> searchSessions(
+    public ResponseEntity<Page<Session>> searchSessions(
             @RequestParam(required = false) String subject,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
-            @RequestParam(required = false) Long tutorId) {
-        // Assuming SessionService has a searchSessions method
-        List<Session> sessions = sessionService.searchSessions(subject, date, tutorId);
-        return ResponseEntity.ok(sessions);
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
+            @RequestParam(required = false) Long tutorId,
+ @RequestParam(required = false) String status,
+ Pageable pageable) {
+ // Assuming SessionService has a searchSessions method
+ Page<Session> sessions = sessionService.searchSessions(subject, startDate, endDate, tutorId, status, pageable);
+ return ResponseEntity.ok(sessions);
     }
 
     @GetMapping("/{sessionId}/resources")

@@ -10,4 +10,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
  User findByEmail(String email);
  User findByResetPasswordToken(String resetPasswordToken);
  Page<User> findAll(Pageable pageable);
+ long countByRole(String role);
 }

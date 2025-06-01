@@ -18,6 +18,8 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
+import jakarta.persistence.EntityNotFoundException;
+
 import java.util.List;
 
 @Service
@@ -177,5 +179,27 @@ public class UserService {
     // Method to get all users with pagination
     public Page<User> getAllUsers(Pageable pageable) {
         return userRepository.findAll(pageable);
+    }
+
+    // Method to mark a notification as read
+    public Notification markNotificationAsRead(Long notificationId, Long userId) {
+        Notification notification = notificationRepository.findById(notificationId)
+                .orElseThrow(() -> new EntityNotFoundException("Notification not found with ID: " + notificationId));
+
+        if (!notification.getUser().getId().equals(userId)) {
+            throw new IllegalStateException("User is not the owner of this notification.");
+        }
+        notification.setReadStatus(true);
+        return notificationRepository.save(notification);
+    }
+
+    // Method to count the number of students
+    public long countStudents() {
+        return userRepository.countByRole("STUDENT");
+    }
+
+    // Method to count the number of tutors
+    public long countTutors() {
+        return userRepository.countByRole("TUTOR");
     }
 }

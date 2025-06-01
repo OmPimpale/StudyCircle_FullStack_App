@@ -12,6 +12,7 @@ import com.studycircle.studycircle.exception.ResourceNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import org.springframework.data.jpa.domain.Specification;
 
 
 
@@ -77,6 +78,7 @@ public class ReviewService {
     }
 
     public Review updateReview(Long reviewId, int rating, String comment) {
+        Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new ResourceNotFoundException("Review not found with id: " + reviewId));
         review.setRating(rating);
         review.setComment(comment);
@@ -85,5 +87,31 @@ public class ReviewService {
 
     public void deleteReview(Long reviewId) {
         reviewRepository.deleteById(reviewId);
+    }
+
+ public Page<Review> searchReviews(Integer rating, LocalDateTime startDate, LocalDateTime endDate, Long sessionId, Long userId, Pageable pageable) {
+ Specification<Review> spec = Specification.where(null);
+
+ if (rating != null) {
+ spec = spec.and((root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("rating"), rating));
+ }
+
+ if (startDate != null && endDate != null) {
+ spec = spec.and((root, query, criteriaBuilder) -> criteriaBuilder.between(root.get("reviewDate"), startDate, endDate));
+ } else if (startDate != null) {
+ spec = spec.and((root, query, criteriaBuilder) -> criteriaBuilder.greaterThanOrEqualTo(root.get("reviewDate"), startDate));
+ } else if (endDate != null) {
+ spec = spec.and((root, query, criteriaBuilder) -> criteriaBuilder.lessThanOrEqualTo(root.get("reviewDate"), endDate));
+ }
+
+ if (sessionId != null) {
+ spec = spec.and((root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("session").get("id"), sessionId));
+ }
+
+ if (userId != null) {
+ spec = spec.and((root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("user").get("id"), userId));
+ }
+
+ return reviewRepository.findAll(spec, pageable);
     }
 }

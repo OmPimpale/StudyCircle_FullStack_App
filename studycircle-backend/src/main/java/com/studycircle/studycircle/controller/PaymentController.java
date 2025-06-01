@@ -26,6 +26,20 @@ public class PaymentController {
         }
     }
 
+    @PostMapping("/webhook")
+    public ResponseEntity<?> handlePaymentWebhook(@RequestBody String payload,
+                                                  @RequestHeader(value = "X-Webhook-Signature", required = false) String signature) {
+        try {
+            // TODO: Implement proper webhook signature verification before processing the payload
+            // Example: if (!paymentService.verifyWebhookSignature(payload, signature)) {
+            //     return ResponseEntity.badRequest().body("Invalid webhook signature");
+            // }
+            paymentService.handleWebhook(payload, signature);
+            return ResponseEntity.ok("Webhook received and processed");
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Error processing webhook: " + e.getMessage());
+        }
+    }
     // Request body class for payment processing
     static class PaymentRequest {
         private Long bookingId;

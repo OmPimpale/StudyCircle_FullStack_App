@@ -8,8 +8,10 @@ const CreateAccount = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
 
     const navigate = useNavigate();
+
     return (
         <>
             <section className={`p-5 lg:p-14 bg-contain lg:grid grid-cols-5 gap-2.5 items-center`}>
@@ -19,9 +21,36 @@ const CreateAccount = () => {
                         <div className='text-center mb-3'>
                             <Link to="/" className='inline-block'><img className="text-[36px] font-bold text-[#FFA500] w-32" src={circleLogo2} /></Link>
                         </div>
-                        <form method="post" action="#" onSubmit="return false">
-                            <h1 class=" text-4xl font-bold text-center mb-2.5">Login</h1>
+                        <form onSubmit={async (e) => {
+ e.preventDefault(); // Prevent default form submission
+ setError(''); // Clear previous errors
+ setLoading(true); // Set loading to true
 
+ try {
+ const response = await fetch('/api/auth/register', {
+ method: 'POST',
+ headers: {
+ 'Content-Type': 'application/json',
+ },
+ body: JSON.stringify({ fullName, username: email, password }),
+ });
+
+ if (response.ok) {
+ navigate('/login'); // Redirect to login on success
+ } else {
+ const errorData = await response.json();
+ setError(errorData.message || 'Account creation failed. Please try again.');
+ }
+ } catch (error) {
+ console.error('Account creation error:', error);
+ setError('An error occurred. Please try again later.');
+ } finally {
+ setLoading(false); // Set loading to false
+ }
+ }}
+ >
+ <h1 class=" text-4xl font-bold text-center mb-2.5 text-[#1e2a38]">Create Account</h1>
+ {/* Full Name */}
                             <div class="my-4">
                                 <label
                                     class="block text-[#1e2a38] text-sm font-semibold mb-2"
@@ -39,6 +68,8 @@ const CreateAccount = () => {
                                     onChange={(e) => setFullName(e.target.value)}
                                 />
                                 <div className='my-6'>
+ {/* Email */}
+
                                     <label
                                         class="block text-[#1e2a38] text-sm font-semibold mb-2"
                                         htmlFor="email"
@@ -55,6 +86,8 @@ const CreateAccount = () => {
                                         onChange={(e) => setEmail(e.target.value)}
                                     />
                                 </div>
+ {/* Password */}
+
                             </div>
                             <div class="my-6">
                                 <label
@@ -72,65 +105,35 @@ const CreateAccount = () => {
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                 />
-                                {/* <div className='text-end'>
-                                    <a
-                                        class="inline-block align-baseline text-sm text-[#5a5a5a] hover:text-[#ffa500]"
-                                        href="#"
-                                    >
-                                        Forgot Password?
-                                    </a>
-                                </div> */}
-                            </div>
+ </div>
+                            {error && (
+                                <div className="text-red-500 text-sm mb-4 text-center">{error}</div>
+                            )}
                             <div class="flex w-full mt-8">
                                 <button
                                     class="w-full bg-[#4A90E2] hover:bg-[#FFA500] duration-300 text-white text-sm py-2 px-4 font-semibold rounded focus:outline-none focus:shadow-outline h-10"
-                                    type="button"
-                                    onClick={() => handleSubmit(null, fullName, email, password, setError, navigate)} // Pass event as null since we're not using e.preventDefault() inside
-                                >
+                                    type="submit"
+                                    disabled={loading}
+ >
                                     Create Account
                                 </button>
                             </div>
-                            <div className="mt-1.5 text-center">
+ <div className="mt-3 text-center">
                                 <span class="text-[#5a5a5a] text-sm">
                                     Already have an Acoount?
                                 </span>
                                 <Link to="/login">
-                                    <span class="text-[#1e2a38] hover:text-[#ffa500] text-sm font-semibold ms-1">
-                                        Sign up
+ <span class="text-[#1e2a38] hover:text-[#FFA500] text-sm font-semibold ms-1">
+ Login
                                     </span>
                                 </Link>
                             </div>
-
                         </form>
                     </div>
                 </div>
             </section>
         </>
     )
-}
-const handleSubmit = async (e, fullName, email, password, setError, navigate) => {
-    e.preventDefault();
-    setError(''); // Clear previous errors
-
-    try {
-        const response = await fetch('/api/auth/register', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ fullName, username: email, password }),
-        });
-
-        if (response.ok) {
-            navigate('/login'); // Redirect to login on success
-        } else {
-            const errorData = await response.json();
-            setError(errorData.message || 'Account creation failed. Please try again.');
-        }
-    } catch (error) {
-        console.error('Account creation error:', error);
-        setError('An error occurred. Please try again later.');
-    }
 }
 
 export default CreateAccount;

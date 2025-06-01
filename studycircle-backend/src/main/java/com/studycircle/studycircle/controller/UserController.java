@@ -125,11 +125,22 @@ public class UserController {
     }
 
     @GetMapping("/{userId}/notifications")
-    public ResponseEntity<List<Notification>> getUserNotifications(@PathVariable Long userId) {
-        List<Notification> notifications = userService.getUserNotifications(userId);
+    public ResponseEntity<Page<Notification>> getUserNotifications(@PathVariable Long userId, @PageableDefault(size = 10, sort = "createdAt", direction = org.springframework.data.domain.Sort.Direction.DESC) Pageable pageable) {
+        Page<Notification> notifications = userService.getUserNotifications(userId, pageable);
         return new ResponseEntity<>(notifications, HttpStatus.OK);
     }
 
+    @PutMapping("/{userId}/notifications/{notificationId}/mark-as-read")
+    public ResponseEntity<Void> markNotificationAsRead(@PathVariable Long userId, @PathVariable Long notificationId, Principal principal) {
+        try {
+            userService.markNotificationAsRead(userId, notificationId, principal.getName());
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+    }
     // Helper class for password reset request body
     static class ResetPasswordRequest {
         private String token;

@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -64,4 +65,16 @@ public class ReviewController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<Page<Review>> searchReviews(
+            @RequestParam(required = false) Integer rating,
+            @RequestParam(required = false) String startDate, // Assuming date as String for simplicity, parse in service
+            @RequestParam(required = false) String endDate, // Assuming date as String for simplicity, parse in service
+            @RequestParam(required = false) Long sessionId,
+            @RequestParam(required = false) Long userId,
+            Pageable pageable) {
+        // Pass null for LocalDateTime parsing in service for now.
+        Page<Review> reviews = reviewService.searchReviews(rating, null, null, sessionId, userId, pageable);
+        return new ResponseEntity<>(reviews, HttpStatus.OK);
+    }
 }
