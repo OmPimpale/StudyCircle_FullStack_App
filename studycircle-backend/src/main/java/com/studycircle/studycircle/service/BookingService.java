@@ -22,4 +22,14 @@ public class BookingService {
         return bookingRepository.save(booking);
     }
 
+    public Booking updateBookingStatus(Long id, String newStatus) {
+        Optional<Booking> existingBookingOptional = bookingRepository.findById(id);
+        if (existingBookingOptional.isPresent()) {
+            Booking existingBooking = existingBookingOptional.get();
+            existingBooking.setStatus(newStatus);
+            return bookingRepository.save(existingBooking);
+        }
+        return null; // Or throw an exception if booking not found
+    }
+
 }

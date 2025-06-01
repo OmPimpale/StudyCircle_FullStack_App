@@ -30,8 +30,19 @@ public class StudentService {
         Optional<Student> existingStudentOptional = studentRepository.findById(id);
         if (existingStudentOptional.isPresent()) {
             Student existingStudent = existingStudentOptional.get();
-            // Update relevant fields from updatedStudent
-            // Example: existingStudent.setField(updatedStudent.getField());
+
+            // Update relevant fields
+            if (updatedStudent.getAcademicLevel() != null && !updatedStudent.getAcademicLevel().isEmpty()) {
+                existingStudent.setAcademicLevel(updatedStudent.getAcademicLevel());
+            }
+            if (updatedStudent.getInterests() != null && !updatedStudent.getInterests().isEmpty()) {
+                existingStudent.setInterests(updatedStudent.getInterests());
+            }
+            // Update relationship with User if needed (consider carefully)
+            // if (updatedStudent.getUser() != null) {
+            //     existingStudent.setUser(updatedStudent.getUser());
+            // }
+
             return studentRepository.save(existingStudent);
         }
         return null; // Or throw an exception

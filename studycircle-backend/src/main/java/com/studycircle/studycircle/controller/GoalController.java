@@ -5,6 +5,7 @@ import com.studycircle.studycircle.service.GoalService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -35,6 +36,13 @@ public class GoalController {
     @GetMapping("/student/{studentId}")
     public ResponseEntity<List<Goal>> getGoalsByStudentId(@PathVariable Long studentId) {
         List<Goal> goals = goalService.findGoalsByStudentId(studentId);
+        return new ResponseEntity<>(goals, HttpStatus.OK);
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<List<Goal>> getAuthenticatedUserGoals(Authentication authentication) {
+        String username = authentication.getName();
+        List<Goal> goals = goalService.findGoalsByUsername(username);
         return new ResponseEntity<>(goals, HttpStatus.OK);
     }
 }
