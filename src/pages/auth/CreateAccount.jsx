@@ -40,6 +40,7 @@ const CreateAccount = () => {
 
                                     if (response.ok) {
                                         navigate('/login'); // Redirect to login on success
+                                        console.log("Success!!");
                                     } else {
                                         const errorData = await response.json();
                                         setError(errorData.message || 'Account creation failed. Please try again.');
@@ -52,18 +53,18 @@ const CreateAccount = () => {
                                 }
                             }}
                             >
-                                <h2 class="text-3xl font-bold text-center text-gray-800 mb-6">Create Account</h2>
+                                <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">Create Account</h2>
                                 {/* Full Name */}
-                                <div class="my-4">
+                                <div className="my-4">
                                     <label
-                                        class="block text-[#1e2a38] text-sm font-semibold mb-2"
-                                        htmlFor="email"
+                                        className="block text-[#1e2a38] text-sm font-semibold mb-2"
+                                        htmlFor="name"
                                     >
                                         Full Name*
                                     </label>
                                     <input
-                                        class="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
-                                        id="email"
+                                        className="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                                        id="name"
                                         type="text"
                                         placeholder="Your name"
                                         required
@@ -74,15 +75,15 @@ const CreateAccount = () => {
                                         {/* Email */}
 
                                         <label
-                                            class="block text-[#1e2a38] text-sm font-semibold mb-2"
+                                            className="block text-[#1e2a38] text-sm font-semibold mb-2"
                                             htmlFor="email"
                                         >
                                             Email*
                                         </label>
                                         <input
-                                            class="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                                            className="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
                                             id="email"
-                                            type="text"
+                                            type="email"
                                             placeholder="Your email address"
                                             required
                                             value={email}
@@ -92,15 +93,15 @@ const CreateAccount = () => {
                                     {/* Password */}
 
                                 </div>
-                                <div class="my-6">
+                                <div className="my-6">
                                     <label
-                                        class="block text-[#1e2a38] text-sm font-semibold mb-2"
+                                        className="block text-[#1e2a38] text-sm font-semibold mb-2"
                                         htmlFor="password"
                                     >
                                         Password*
                                     </label>
                                     <input
-                                        class="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                                        className="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
                                         id="password"
                                         type="password"
                                         placeholder="Your password"
@@ -112,9 +113,9 @@ const CreateAccount = () => {
                                 {error && (
                                     <div className="text-red-500 text-sm mb-4 text-center">{error}</div>
                                 )}
-                                <div class="flex w-full mt-8">
+                                <div className="flex w-full mt-8">
                                     <button
-                                        class="w-full bg-[#4A90E2] hover:bg-[#FFA500] duration-300 text-white text-sm py-2 px-4 font-semibold rounded focus:outline-none focus:shadow-outline h-10"
+                                        className="w-full bg-[#4A90E2] hover:bg-[#FFA500] duration-300 text-white text-sm py-2 px-4 font-semibold rounded focus:outline-none focus:shadow-outline h-10"
                                         type="submit"
                                         disabled={loading}
                                     >
@@ -122,11 +123,11 @@ const CreateAccount = () => {
                                     </button>
                                 </div>
                                 <div className="mt-3 text-center">
-                                    <span class="text-[#5a5a5a] text-sm">
+                                    <span className="text-[#5a5a5a] text-sm">
                                         Already have an Acoount?
                                     </span>
                                     <Link to="/login">
-                                        <span class="text-[#1e2a38] hover:text-[#FFA500] text-sm font-semibold ms-1">
+                                        <span className="text-[#1e2a38] hover:text-[#FFA500] text-sm font-semibold ms-1">
                                             Login
                                         </span>
                                     </Link>

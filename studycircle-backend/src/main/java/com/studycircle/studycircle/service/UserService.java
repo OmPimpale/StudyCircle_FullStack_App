@@ -4,6 +4,7 @@ import com.studycircle.studycircle.model.Student;
 import com.studycircle.studycircle.model.Tutor;
 import com.studycircle.studycircle.model.Notification;
 import com.studycircle.studycircle.model.User;
+import com.studycircle.studycircle.repository.NotificationRepository;
 import com.studycircle.studycircle.repository.StudentRepository;
 import com.studycircle.studycircle.repository.TutorRepository;
 import com.studycircle.studycircle.repository.UserRepository;
@@ -11,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.mail.MailException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -25,18 +28,22 @@ import java.util.List;
 @Service
 public class UserService {
 
+    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
+
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final StudentRepository studentRepository;
     private final TutorRepository tutorRepository;
     private final EmailService emailService; // Inject EmailService
-    private final NotificationRepository notificationRepository; // Inject NotificationRepository
+    private final notificationRepository notificationRepository; // Inject NotificationRepository
 
     @Autowired
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, StudentRepository studentRepository, TutorRepository tutorRepository, EmailService emailService, NotificationRepository notificationRepository) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder,
+            StudentRepository studentRepository, TutorRepository tutorRepository, EmailService emailService,
+            NotificationRepository notificationRepository) {
         this.studentRepository = studentRepository;
         this.tutorRepository = tutorRepository;
- this.notificationRepository = notificationRepository;
+        this.notificationRepository = notificationRepository;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.emailService = emailService;
@@ -58,38 +65,49 @@ public class UserService {
     }
 
     public User registerNewUser(String fullName, String username, String password) {
+        logger.info("Attempting to register new user with username: {}", username);
         // Basic validation
- if (username == null || username.isEmpty() || password == null || password.isEmpty() || fullName == null || fullName.isEmpty()) {
- throw new IllegalArgumentException("Full name, username (email), and password are required.");
- }
+        if (username == null || username.isEmpty() || password == null || password.isEmpty() || fullName == null
+                || fullName.isEmpty()) {
+            logger.warn("Registration failed: Missing required fields for username: {}", username);
+            throw new IllegalArgumentException("Full name, username (email), and password are required.");
+        }
 
- // Validate email format (basic check, more robust validation can be added)
- if (!username.matches("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")) {
- throw new IllegalArgumentException("Invalid email format.");
- }
+        // Validate email format (basic check, more robust validation can be added)
+        if (!username.matches("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")) {
+            logger.warn("Registration failed: Invalid email format for username: {}", username);
+            throw new IllegalArgumentException("Invalid email format.");
+        }
 
- // Check if email is already in use
- if (userRepository.findByEmail(username) != null) {
- throw new IllegalArgumentException("Email address is already registered.");
- }
+        // Check if email is already in use
+        logger.info("Checking if email already exists for username: {}", username);
+        if (userRepository.findByEmail(username) != null) {
+            logger.warn("Registration failed: Email address already registered for username: {}", username);
+            throw new IllegalArgumentException("Email address is already registered.");
+        }
+        logger.info("Email address is available for username: {}", username);
 
         User newUser = new User();
         // Assuming username is the email
         newUser.setUsername(username);
         newUser.setEmail(username); // Set email field as well
- newUser.setPassword(passwordEncoder.encode(password));
- newUser.setRole("STUDENT"); // Default role is STUDENT
+        logger.info("Encoding password for username: {}", username);
+        newUser.setPassword(passwordEncoder.encode(password));
+        logger.info("Password encoded for username: {}", username);
+        newUser.setRole("STUDENT"); // Default role is STUDENT
 
- try {
+        try {
             String[] nameParts = fullName.split(" ", 2);
             newUser.setFirstName(nameParts.length > 0 ? nameParts[0] : "");
             newUser.setLastName(nameParts.length > 1 ? nameParts[1] : "");
- return userRepository.save(newUser);
+            logger.info("Saving new user to database for username: {}", username);
+            return userRepository.save(newUser);
         } catch (DataIntegrityViolationException e) {
- // Handle cases where username or email might be duplicated at the database level
- throw new IllegalArgumentException("Email address is already registered.", e);
+            // Handle cases where username or email might be duplicated at the database
+            // level
+            throw new IllegalArgumentException("Email address is already registered.", e);
         } catch (Exception e) {
- throw new RuntimeException("Error during user registration.", e);
+            throw new RuntimeException("Error during user registration.", e);
         }
     }
 
@@ -102,17 +120,17 @@ public class UserService {
             user.setResetPasswordExpiry(LocalDateTime.now().plusHours(24)); // Token expires in 24 hours
             userRepository.save(user);
 
- try {
+            try {
                 // Send email with reset link
                 String resetLink = "YOUR_FRONTEND_RESET_PASSWORD_URL?token=" + token; // Replace with your frontend URL
                 emailService.sendEmail(
- user.getEmail(),
- "Password Reset Request for StudyCircle",
- "To reset your password, click on the following link: " + resetLink + "\n\nThis link will expire in 24 hours."
-                );
+                        user.getEmail(),
+                        "Password Reset Request for StudyCircle",
+                        "To reset your password, click on the following link: " + resetLink
+                                + "\n\nThis link will expire in 24 hours.");
             } catch (MailException e) {
- // Log email sending failure, but don't prevent the token from being saved
- System.err.println("Failed to send password reset email: " + e.getMessage());
+                // Log email sending failure, but don't prevent the token from being saved
+                System.err.println("Failed to send password reset email: " + e.getMessage());
             }
             return true;
         }
@@ -122,7 +140,8 @@ public class UserService {
     // Method to confirm password reset
     public boolean confirmPasswordReset(String token, String newPassword) {
         User user = userRepository.findByResetPasswordToken(token);
-        if (user != null && user.getResetPasswordExpiry() != null && user.getResetPasswordExpiry().isAfter(LocalDateTime.now())) {
+        if (user != null && user.getResetPasswordExpiry() != null
+                && user.getResetPasswordExpiry().isAfter(LocalDateTime.now())) {
             user.setPassword(passwordEncoder.encode(newPassword));
             user.setResetPasswordToken(null);
             user.setResetPasswordExpiry(null);
@@ -134,46 +153,48 @@ public class UserService {
 
     // Method to create or update student profile
     public Student createOrUpdateStudentProfile(Long userId, Student studentProfile) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + userId));
- if (studentProfile == null) {
- throw new IllegalArgumentException("Student profile data cannot be null.");
- }
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + userId));
+        if (studentProfile == null) {
+            throw new IllegalArgumentException("Student profile data cannot be null.");
+        }
         studentProfile.setUser(user);
- return studentRepository.save(studentProfile);
+        return studentRepository.save(studentProfile);
     }
 
     // Method to create or update tutor profile
     public Tutor createOrUpdateTutorProfile(Long userId, Tutor tutorProfile) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + userId));
- if (tutorProfile == null) {
- throw new IllegalArgumentException("Tutor profile data cannot be null.");
- }
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + userId));
+        if (tutorProfile == null) {
+            throw new IllegalArgumentException("Tutor profile data cannot be null.");
+        }
         tutorProfile.setUser(user);
- return tutorRepository.save(tutorProfile);
+        return tutorRepository.save(tutorProfile);
     }
 
     // Method to update user details
- public User updateUser(Long id, User updatedUser) {
- Optional<User> existingUserOptional = userRepository.findById(id);
+    public User updateUser(Long id, User updatedUser) {
+        Optional<User> existingUserOptional = userRepository.findById(id);
 
- if (existingUserOptional.isPresent()) {
- User existingUser = existingUserOptional.get();
+        if (existingUserOptional.isPresent()) {
+            User existingUser = existingUserOptional.get();
             // Add validation for updatedUser fields if necessary
- // For example, validate email format if email is being updated
+            // For example, validate email format if email is being updated
 
- return userRepository.save(existingUser);
+            return userRepository.save(existingUser);
         } else {
- throw new IllegalArgumentException("User not found with ID: " + id);
+            throw new IllegalArgumentException("User not found with ID: " + id);
         }
     }
 
     // Method to get notifications for a user by user ID
- public Page<Notification> getNotificationsByUserId(Long userId, Pageable pageable) {
+    public Page<Notification> getNotificationsByUserId(Long userId, Pageable pageable) {
         Optional<User> userOptional = userRepository.findById(userId);
         if (userOptional.isPresent()) {
- return notificationRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable);
+            return notificationRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable);
         }
- return Page.empty(pageable); // Return an empty page if user not found
+        return Page.empty(pageable); // Return an empty page if user not found
     }
 
     // Method to get all users with pagination

@@ -12,8 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -22,8 +20,6 @@ import java.util.List;
 @RequestMapping("/api/sessions")
 @PreAuthorize("isAuthenticated()") // Secure all endpoints in this controller
 public class SessionController {
-
-    private static final Logger logger = LoggerFactory.getLogger(SessionController.class);
 
     @Autowired
     private SessionService sessionService;
@@ -34,10 +30,8 @@ public class SessionController {
             Session createdSession = sessionService.createSession(session);
             return ResponseEntity.ok(createdSession);
         } catch (IllegalArgumentException e) {
-            logger.error("Invalid session data: {}", e.getMessage());
             return ResponseEntity.badRequest().body(null);
         } catch (EntityNotFoundException e) {
-            logger.error("Entity not found: {}", e.getMessage());
             return ResponseEntity.notFound().build();
         }
     }
@@ -55,7 +49,6 @@ public class SessionController {
             Session session = sessionService.getSessionById(id);
             return ResponseEntity.ok(session);
         } catch (EntityNotFoundException e) {
-            logger.error("Session not found with id {}: {}", id, e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
@@ -66,7 +59,6 @@ public class SessionController {
             Page<Session> sessions = sessionService.getAllSessionsForTutor(tutorId, pageable);
             return ResponseEntity.ok(sessions);
         } catch (EntityNotFoundException e) {
-            logger.error("Tutor not found with id {}: {}", tutorId, e.getMessage());
             return ResponseEntity.notFound().build();
         }
     }
@@ -77,42 +69,25 @@ public class SessionController {
             List<Session> sessions = sessionService.getAllSessionsForStudent(studentId);
             return ResponseEntity.ok(sessions);
         } catch (EntityNotFoundException e) {
-            logger.error("Student not found with id {}: {}", studentId, e.getMessage());
             return ResponseEntity.notFound().build();
         }
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Session> updateSession(@PathVariable Long id, @RequestBody Session sessionDetails) {
-        try {
-            Session updatedSession = sessionService.updateSession(id, sessionDetails);
+        Session updatedSession = sessionService.updateSession(id, sessionDetails);
+        if (updatedSession != null) {
             return ResponseEntity.ok(updatedSession);
-        } catch (EntityNotFoundException e) {
-            logger.error("Session to update not found with id {}: {}", id, e.getMessage());
-            return ResponseEntity.notFound().build();
         }
-    }
-
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException e) {
-        logger.error("Illegal argument: {}", e.getMessage());
-        return ResponseEntity.badRequest().body(e.getMessage());
-    }
-
-    @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity<String> handleEntityNotFoundException(EntityNotFoundException e) {
-        logger.error("Entity not found: {}", e.getMessage());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        return ResponseEntity.notFound().build();
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> cancelSession(@PathVariable Long id) {
         boolean cancelled = sessionService.cancelSession(id);
         if (cancelled) {
-            logger.info("Session with id {} successfully cancelled", id);
             return ResponseEntity.noContent().build(); // 204 No Content
         } else {
-            logger.warn("Attempted to cancel session with id {} but it was not found", id);
             return ResponseEntity.notFound().build();
         }
     }
@@ -133,5 +108,15 @@ public class SessionController {
     public ResponseEntity<List<Resource>> getResourcesBySessionId(@PathVariable Long sessionId) {
         List<Resource> resources = sessionService.getResourcesBySessionId(sessionId);
         return ResponseEntity.ok(resources);
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException e) {
+        return ResponseEntity.badRequest().body(e.getMessage());
+    }
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<String> handleEntityNotFoundException(EntityNotFoundException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
     }
 }
