@@ -2,13 +2,14 @@ package com.studycircle.studycircle.controller;
 
 import com.studycircle.studycircle.model.Tutor;
 import com.studycircle.studycircle.service.TutorService;
+import com.studycircle.studycircle.dto.AvailableTimeSlot; // Import AvailableTimeSlot
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
+// Remove unused import: import java.util.Map;
 
 @RestController
 @RequestMapping("/api/tutors")
@@ -51,9 +52,10 @@ public class TutorController {
         return new ResponseEntity<>(tutors, HttpStatus.OK);
     }
 
-    @GetMapping("/{tutorId}/available-slots")
-    public ResponseEntity<Map<LocalDate, List<String>>> getAvailableSlots(@PathVariable Long tutorId, @RequestParam(value = "date", required = false) LocalDate date) {
-        Map<LocalDate, List<String>> availableSlots = tutorService.getAvailableSlots(tutorId, date);
+    @GetMapping("/{tutorId}/available-slots") // Corrected return type to match service
+    public ResponseEntity<List<AvailableTimeSlot>> getAvailableSlots(@PathVariable Long tutorId, @RequestParam(value = "date", required = false) LocalDate date) {
+        // Corrected method call to match service method name
+        List<AvailableTimeSlot> availableSlots = tutorService.getAvailableTimeSlots(tutorId, date);
         return new ResponseEntity<>(availableSlots, HttpStatus.OK);
     }
     // Add other controller methods as needed

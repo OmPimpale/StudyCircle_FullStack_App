@@ -4,9 +4,11 @@ import com.studycircle.studycircle.model.Session;
 import com.studycircle.studycircle.model.SessionStatus;
 import com.studycircle.studycircle.model.Subject;
 import com.studycircle.studycircle.model.Tutor;
+import com.studycircle.studycircle.model.Resource; // Import Resource
 import com.studycircle.studycircle.repository.SessionRepository;
 import com.studycircle.studycircle.repository.SubjectRepository;
 import com.studycircle.studycircle.repository.TutorRepository;
+import com.studycircle.studycircle.repository.ResourceRepository; // Import ResourceRepository
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,11 +16,12 @@ import org.springframework.stereotype.Service;
 import jakarta.persistence.EntityNotFoundException;
 
 import java.time.LocalDateTime;
-import java.time.LocalDate;
+import java.time.LocalDate; // Import LocalDate
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.math.BigDecimal; // Import BigDecimal
 
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.transaction.annotation.Transactional; // Import Transactional
@@ -30,14 +33,18 @@ public class SessionService {
     private final SessionRepository sessionRepository;
     private final TutorRepository tutorRepository;
     private final SubjectRepository subjectRepository;
+    private final ResourceRepository resourceRepository; // Inject ResourceRepository
+
 
     @Autowired
     public SessionService(SessionRepository sessionRepository,
                           TutorRepository tutorRepository,
-                          SubjectRepository subjectRepository) {
+                          SubjectRepository subjectRepository,
+                          ResourceRepository resourceRepository) { // Include ResourceRepository in constructor
         this.sessionRepository = sessionRepository;
         this.tutorRepository = tutorRepository;
         this.subjectRepository = subjectRepository;
+        this.resourceRepository = resourceRepository; // Assign ResourceRepository
     }
 
     @Transactional // Add Transactional annotation
@@ -88,7 +95,8 @@ public class SessionService {
     }
 
     public Page<Session> getAllSessionsForStudent(Long studentId, Pageable pageable) {
-        // Assuming Session has a ManyToOne relationship with Student
+        // Assuming Session has a ManyToOne relationship with Student and SessionRepository has findByStudentId
+        // You might need to adjust this based on your actual data model and repository methods
         return sessionRepository.findByStudentId(studentId, pageable);
     }
 
@@ -220,6 +228,15 @@ public class SessionService {
 
 
         return sessionRepository.findAll(spec, pageable);
+    }
+
+    // Add the missing getResourcesBySessionId method
+    public List<Resource> getResourcesBySessionId(Long sessionId) {
+        // Assuming ResourceRepository has a findBySessionId method that returns a List
+        // If your findBySessionId in ResourceRepository returns Page, you might need to
+        // fetch all content from the page or add a List returning method to ResourceRepository.
+        // Example using a List returning method:
+         return resourceRepository.findBySessionId(sessionId);
     }
 
     // You will need to add this method to your SessionRepository:

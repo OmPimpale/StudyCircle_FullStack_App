@@ -58,13 +58,15 @@ public class TutorService {
             if (updatedTutor.getBio() != null && !updatedTutor.getBio().isEmpty()) {
                 existingTutor.setBio(updatedTutor.getBio());
             }
-            // Corrected reference to updatedTutor.getProfilePictureUrl() and updatedTutor.getUser().getProfilePictureUrl()
-            // Assuming profile picture URL is directly on the Tutor or accessible via Tutor.getUser().getProfilePictureUrl()
+            // Corrected reference to updatedTutor.getProfilePictureUrl()
+            // Assuming profile picture URL is directly on the Tutor model
             if (updatedTutor.getProfilePictureUrl() != null && !updatedTutor.getProfilePictureUrl().isEmpty()) {
                  existingTutor.setProfilePictureUrl(updatedTutor.getProfilePictureUrl());
-            } else if (updatedTutor.getUser() != null && updatedTutor.getUser().getProfilePictureUrl() != null && !updatedTutor.getUser().getProfilePictureUrl().isEmpty()) {
-                 existingTutor.setProfilePictureUrl(updatedTutor.getUser().getProfilePictureUrl());
             }
+            // Removed the else if block that tries to get profile picture from User
+            // else if (updatedTutor.getUser() != null && updatedTutor.getUser().getProfilePictureUrl() != null && !updatedTutor.getUser().getProfilePictureUrl().isEmpty()) {
+            //      existingTutor.setProfilePictureUrl(updatedTutor.getUser().getProfilePictureUrl());
+            // }
 
             // Updating subjects might require a separate method or careful handling
             // Ensure Tutor model has getSubjects and setSubjects methods
@@ -142,6 +144,6 @@ public class TutorService {
 
     // You will also need to ensure your Tutor model has:
     // - Getter and setter methods for qualifications, experience, bio, and profilePictureUrl
-    // - A getUser() method if profilePictureUrl is accessed via the User model
+    // - A getUser() method if profilePictureUrl is accessed via the User model (though we removed direct access in updateTutor)
     // - Getter and setter methods for subjects if they are stored in the Tutor model
 }

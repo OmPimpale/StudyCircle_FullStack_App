@@ -114,6 +114,15 @@ public class BookingService {
         return bookingRepository.findByTutorId(tutorId, pageable);
     }
 
+    // Add the missing deleteBooking method
+    @Transactional // Add Transactional annotation
+    public void deleteBooking(Long id) {
+        // You might add checks here, e.g., only allow deleting if in a certain status
+        // Or check if the booking exists before deleting (optional, deleteById handles non-existence without error)
+        bookingRepository.deleteById(id);
+    }
+
+
     // You will likely need these methods in your BookingRepository:
     // boolean existsBySessionId(Long sessionId);
     // Page<Booking> findByStudentId(Long studentId, Pageable pageable);

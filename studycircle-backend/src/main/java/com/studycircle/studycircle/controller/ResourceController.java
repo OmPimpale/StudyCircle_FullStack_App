@@ -1,7 +1,7 @@
 package com.studycircle.studycircle.controller;
 
+import jakarta.persistence.EntityNotFoundException;
 import com.studycircle.studycircle.exception.ErrorResponse; // Import ErrorResponse
-import com.studycircle.studycircle.exception.EntityNotFoundException; // Import EntityNotFoundException
 import com.studycircle.studycircle.model.Resource;
 import com.studycircle.studycircle.service.ResourceService;
 import com.studycircle.studycircle.model.User; // Import User

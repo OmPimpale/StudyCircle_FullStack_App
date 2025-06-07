@@ -195,6 +195,24 @@ public class UserService {
         return tutorRepository.save(tutorProfile);
     }
 
+    // Add method to get student profile by user ID
+    public Optional<Student> getStudentProfile(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId));
+        // Assuming Student entity has a ManyToOne relationship with User
+        // and StudentRepository has findByUser method
+        return studentRepository.findByUser(user); // You might need findByUserId if relationship is mapped differently
+    }
+
+    // Add method to get tutor profile by user ID
+    public Optional<Tutor> getTutorProfile(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId));
+        // Assuming Tutor entity has a ManyToOne relationship with User
+        // and TutorRepository has findByUser method
+        return tutorRepository.findByUser(user); // You might need findByUserId if relationship is mapped differently
+    }
+
     // Method to update user details
     @Transactional // Add Transactional annotation
     public User updateUser(Long id, User updatedUser) {
@@ -216,8 +234,8 @@ public class UserService {
     public Page<Notification> getNotificationsByUserId(Long userId, Pageable pageable) {
         Optional<User> userOptional = userRepository.findById(userId);
         if (userOptional.isPresent()) {
-            // Ensure NotificationRepository has findByUserIdOrderByCreatedAtDesc method
-            return notificationRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable);
+            // Corrected method call to match NotificationRepository method name
+            return notificationRepository.findByUser_IdOrderByCreatedAtDesc(userId, pageable);
         }
         return Page.empty(pageable); // Return an empty page if user not found
     }
@@ -270,5 +288,11 @@ public class UserService {
     // - Setter for readStatus (setReadStatus(boolean))
 
     // You will need to ensure your NotificationRepository has:
-    // - Page<Notification> findByUserIdOrderByCreatedAtDesc(Long userId, Pageable pageable);
+    // - Page<Notification> findByUser_IdOrderByCreatedAtDesc(Long userId, Pageable pageable);
+
+    // You will need to ensure your StudentRepository has:
+    // - Optional<Student> findByUser(User user); or findByUserId(Long userId);
+
+    // You will need to ensure your TutorRepository has:
+    // - Optional<Tutor> findByUser(User user); or findByUserId(Long userId);
 }

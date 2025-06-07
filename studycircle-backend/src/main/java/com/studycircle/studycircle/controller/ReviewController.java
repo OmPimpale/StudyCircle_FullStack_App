@@ -98,9 +98,9 @@ public class ReviewController {
                 endDateTime = LocalDateTime.parse(endDate); // Assuming ISO 8601 format
             }
         } catch (DateTimeParseException e) {
-            return ResponseEntity.badRequest().body("Invalid date format. Please use ISO 8601 format (e.g., YYYY-MM-DDThh:mm:ss).");
+            // Return null body with BAD_REQUEST status to be consistent with return type
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
         }
-
 
         Page<Review> reviews = reviewService.searchReviews(rating, startDateTime, endDateTime, sessionId, userId, pageable);
         return new ResponseEntity<>(reviews, HttpStatus.OK);

@@ -3,13 +3,15 @@ package com.studycircle.studycircle.controller;
 import com.studycircle.studycircle.model.User;
 import com.studycircle.studycircle.model.Session;
 import com.studycircle.studycircle.service.SessionService;
-import com.studycircle.studycircle.service.UserService;
+import com.studycircle.studycircle.service.UserService; // Import UserService
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import java.util.Optional; // Import Optional
+
 
 @RestController
 @RequestMapping("/api/admin")
@@ -30,9 +32,10 @@ public class AdminController {
 
     @GetMapping("/users/{id}")
     public ResponseEntity<User> getUserById(@PathVariable Long id) {
-        User user = userService.getUserById(id);
-        if (user != null) {
-            return ResponseEntity.ok(user);
+        // Handle Optional return type from service
+        Optional<User> user = userService.getUserById(id);
+        if (user.isPresent()) { // Check if user is present in the Optional
+            return ResponseEntity.ok(user.get()); // Get the User object from Optional
         }
         return ResponseEntity.notFound().build();
     }

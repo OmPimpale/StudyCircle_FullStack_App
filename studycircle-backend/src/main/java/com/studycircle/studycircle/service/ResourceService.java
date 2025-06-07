@@ -1,5 +1,7 @@
 package com.studycircle.studycircle.service;
 
+import java.util.UUID;
+
 import com.studycircle.studycircle.model.Resource;
 import com.studycircle.studycircle.model.Session;
 import com.studycircle.studycircle.model.User;
@@ -17,9 +19,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.time.Instant;
+// Change import from java.time.Instant to java.time.LocalDateTime
+import java.time.LocalDateTime; // Import LocalDateTime
 import java.util.Optional;
-import java.util.UUID;
+// Remove unused import: import java.util.UUID;
 import java.util.Set; // Import Set if roles are stored in a Set
 
 import org.springframework.data.domain.Page;
@@ -74,12 +77,12 @@ public class ResourceService {
         Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
         Resource resource = new Resource();
-        // Ensure Resource model has setFileName, setUrl, setUser, setSession, and setCreatedAt methods
+        // Ensure Resource model has setFileName, setUrl, setUploader, setSession, and setUploadTimestamp methods
         resource.setFileName(originalFileName);
         resource.setUrl(filePath.toString()); // Store file path as URL
-        resource.setUser(user);
+        resource.setUploader(user); // Corrected method call
         resource.setSession(session);
-        resource.setCreatedAt(Instant.now());
+        resource.setUploadTimestamp(LocalDateTime.now()); // Corrected method call and used LocalDateTime.now()
 
         return resourceRepository.save(resource);
     }
@@ -95,8 +98,8 @@ public class ResourceService {
     public Page<Resource> getResourcesByUserId(Long userId, Pageable pageable) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId)); // Use EntityNotFoundException
-        // Ensure ResourceRepository has findByUser method
-        return resourceRepository.findByUser(user, pageable);
+        // Ensure ResourceRepository has findByUploader method (assuming the relationship is mapped by uploader)
+        return resourceRepository.findByUploader(user, pageable); // Corrected method call
     }
 
     @Transactional // Add Transactional annotation
@@ -104,8 +107,8 @@ public class ResourceService {
         Resource resource = resourceRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Resource not found with ID: " + id)); // Use EntityNotFoundException
 
-        // Ensure Resource model has getUser() method
-        if (!resource.getUser().getId().equals(authenticatedUserId)) {
+        // Ensure Resource model has getUploader() method
+        if (!resource.getUploader().getId().equals(authenticatedUserId)) { // Corrected method call
             throw new AccessDeniedException("You do not have permission to update this resource.");
         }
 
@@ -122,15 +125,15 @@ public class ResourceService {
 
         // Save the new file
         String originalFileName = newFile.getOriginalFilename();
-        String uniqueFileName = System.currentTimeMillis() + "_" + originalFileName;
+        String uniqueFileName = UUID.randomUUID().toString() + "_" + originalFileName; // Use UUID for uniqueness
         Path newFilePath = Paths.get(uploadDir, uniqueFileName);
         Files.createDirectories(newFilePath.getParent());
         Files.copy(newFile.getInputStream(), newFilePath, StandardCopyOption.REPLACE_EXISTING);
 
-        // Ensure Resource model has setFileName, setUrl, and setCreatedAt methods
+        // Ensure Resource model has setFileName, setUrl, and setUploadTimestamp methods
         resource.setFileName(originalFileName);
         resource.setUrl(newFilePath.toString());
-        resource.setCreatedAt(Instant.now());
+        resource.setUploadTimestamp(LocalDateTime.now()); // Corrected method call and used LocalDateTime.now()
 
         return resourceRepository.save(resource);
     }
@@ -140,8 +143,8 @@ public class ResourceService {
         Resource resource = resourceRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Resource not found with ID: " + id)); // Use EntityNotFoundException
 
-        // Ensure Resource model has getUser() method
-        if (!resource.getUser().getId().equals(authenticatedUserId)) {
+        // Ensure Resource model has getUploader() method
+        if (!resource.getUploader().getId().equals(authenticatedUserId)) { // Corrected method call
             throw new AccessDeniedException("You do not have permission to delete this resource.");
         }
 
@@ -165,8 +168,10 @@ public class ResourceService {
     }
 
     // You will likely need these methods in your ResourceRepository:
-    // Page<Resource> findByUser(User user, Pageable pageable);
+    // Page<Resource> findByUploader(User uploader, Pageable pageable);
     // Page<Resource> findBySessionId(Long sessionId, Pageable pageable);
+    // List<Resource> findBySessionId(Long sessionId); // If you need a List version
+
 
     // You need to ensure your User model has a method like getRoles()
     // that returns a collection of roles (e.g., Set<String>).
