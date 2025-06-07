@@ -12,9 +12,11 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder; // Import PasswordEncoder
 import org.springframework.security.web.SecurityFilterChain;
 
-import java.security.AuthProvider;
+// Remove the incorrect import
+// import java.security.AuthProvider;
 
 
 @EnableMethodSecurity
@@ -31,11 +33,13 @@ public class SecurityConfig {
             .authorizeHttpRequests(authorizeRequests ->
                 authorizeRequests
                     .requestMatchers("/api/auth/**").permitAll() // Allow access to auth endpoints
+                    .anyRequest().authenticated() // Require authentication for all other endpoints
             )
-            .csrf().disable(); // Disable CSRF for stateless API
-        http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+            .csrf(csrf -> csrf.disable()) // Use lambda for CSRF configuration
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+
         http.addFilterBefore(jwtRequestFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
-        
+
         return http.build();
     }
 

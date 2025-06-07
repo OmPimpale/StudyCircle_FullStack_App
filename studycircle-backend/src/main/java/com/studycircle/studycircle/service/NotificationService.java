@@ -28,7 +28,10 @@ public class NotificationService {
             javaMailSender.send(mail);
         } catch (MailException e) {
             // Log the error or handle it appropriately
+            System.err.println("Error sending email to " + to + ": " + e.getMessage());
             e.printStackTrace();
         }
     }
+
+    // You might add other notification methods here (e.g., push notifications)
 }

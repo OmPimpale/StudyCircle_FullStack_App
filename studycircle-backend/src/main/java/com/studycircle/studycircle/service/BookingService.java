@@ -1,6 +1,7 @@
 package com.studycircle.studycircle.service;
 
 import com.studycircle.studycircle.model.Booking;
+import com.studycircle.studycircle.model.BookingStatus; // Import BookingStatus
 import com.studycircle.studycircle.repository.BookingRepository;
 import com.studycircle.studycircle.model.Session;
 import com.studycircle.studycircle.model.Student;
@@ -12,7 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.EntityNotFoundException; // Import EntityNotFoundException
+import org.springframework.transaction.annotation.Transactional; // Import Transactional
+
 
 import java.util.Optional;
 
@@ -35,46 +38,60 @@ public class BookingService {
         this.tutorRepository = tutorRepository;
     }
 
+    @Transactional // Add Transactional annotation
     public Booking createNewBooking(Long sessionId, Long studentId) {
         Session session = sessionRepository.findById(sessionId)
-                .orElseThrow(() -> new EntityNotFoundException("Session not found with ID: " + sessionId));
+                .orElseThrow(() -> new EntityNotFoundException("Session not found with ID: " + sessionId)); // Use EntityNotFoundException
         Student student = studentRepository.findById(studentId)
-                .orElseThrow(() -> new EntityNotFoundException("Student not found with ID: " + studentId));
+                .orElseThrow(() -> new EntityNotFoundException("Student not found with ID: " + studentId)); // Use EntityNotFoundException
+
+        // Ensure Session model has getTutor() method
         Tutor tutor = session.getTutor();
 
         if (tutor == null) {
             throw new IllegalStateException("Session does not have a tutor assigned.");
         }
 
-        if (!"SCHEDULED".equals(session.getStatus())) {
+        // Ensure Session model has getStatus() method and compare with enum name
+        if (!session.getStatus().equals(com.studycircle.studycircle.model.SessionStatus.SCHEDULED.name())) {
             throw new IllegalStateException(
                     "Session is not available for booking. Current status: " + session.getStatus());
         }
 
-        // Check if session already booked (assuming Booking entity has session field)
+        // Assuming BookingRepository has existsBySessionId method
         boolean alreadyBooked = bookingRepository.existsBySessionId(sessionId);
         if (alreadyBooked) {
             throw new IllegalStateException("Session has already been booked.");
         }
 
         Booking booking = new Booking();
+        // Ensure Booking model has setSession, setStudent, setTutor, and setStatus methods
         booking.setSession(session);
         booking.setStudent(student);
         booking.setTutor(tutor);
-        booking.setStatus("BOOKED");
-        // Set other fields as needed
+        booking.setStatus(BookingStatus.BOOKED.name()); // Set status using enum name
+        // Set other fields as needed (e.g., bookingDate)
+         // booking.setBookingDate(LocalDateTime.now());
+
 
         return bookingRepository.save(booking);
     }
 
+    @Transactional // Add Transactional annotation
     public Booking updateBookingStatus(Long id, String newStatus) {
         Optional<Booking> existingBookingOptional = bookingRepository.findById(id);
         if (existingBookingOptional.isPresent()) {
             Booking existingBooking = existingBookingOptional.get();
-            existingBooking.setStatus(newStatus);
-            return bookingRepository.save(existingBooking);
+            // Ensure Booking model has setStatus method and validate newStatus
+            try {
+                BookingStatus bookingStatus = BookingStatus.valueOf(newStatus.toUpperCase());
+                existingBooking.setStatus(bookingStatus.name()); // Set status using enum name
+                return bookingRepository.save(existingBooking);
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("Invalid booking status: " + newStatus);
+            }
         }
-        return null; // Or throw an exception if booking not found
+        return null; // Or throw an exception if booking not found (consider EntityNotFoundException)
     }
 
     public Optional<Booking> getBookingById(Long id) {
@@ -96,4 +113,9 @@ public class BookingService {
         // and BookingRepository has findByTutorId method
         return bookingRepository.findByTutorId(tutorId, pageable);
     }
+
+    // You will likely need these methods in your BookingRepository:
+    // boolean existsBySessionId(Long sessionId);
+    // Page<Booking> findByStudentId(Long studentId, Pageable pageable);
+    // Page<Booking> findByTutorId(Long tutorId, Pageable pageable);
 }

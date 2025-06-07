@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import jakarta.persistence.EntityNotFoundException;
 
 import java.time.LocalDateTime;
 import java.time.LocalDate;
@@ -19,149 +20,158 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.transaction.annotation.Transactional; // Import Transactional
+
+
 @Service
 public class SessionService {
 
-    @Autowired
-    private SessionRepository sessionRepository;
+    private final SessionRepository sessionRepository;
+    private final TutorRepository tutorRepository;
+    private final SubjectRepository subjectRepository;
 
     @Autowired
-    private TutorRepository tutorRepository;
+    public SessionService(SessionRepository sessionRepository,
+                          TutorRepository tutorRepository,
+                          SubjectRepository subjectRepository) {
+        this.sessionRepository = sessionRepository;
+        this.tutorRepository = tutorRepository;
+        this.subjectRepository = subjectRepository;
+    }
 
-    @Autowired
-    private SubjectRepository subjectRepository; // Assuming you have a Subject entity and repository
-
-    // Assuming Subject has a getName() method and Session has a setSubject() method that takes a String
-    public Session createSession(Long tutorId, Long subjectId, LocalDateTime startTime, LocalDateTime endTime) {
+    @Transactional // Add Transactional annotation
+    public Session createSession(Long tutorId, Long subjectId, LocalDateTime startTime, LocalDateTime endTime, BigDecimal hourlyRate) { // Added hourlyRate
         if (startTime == null || endTime == null) {
- throw new IllegalArgumentException("Start time and end time cannot be null");
+            throw new IllegalArgumentException("Start time and end time cannot be null");
         }
         if (startTime.isAfter(endTime)) {
- throw new IllegalArgumentException("Start time must be before end time");
+            throw new IllegalArgumentException("Start time must be before end time");
+        }
+        if (hourlyRate == null || hourlyRate.compareTo(BigDecimal.ZERO) <= 0) { // Basic validation for hourly rate
+             throw new IllegalArgumentException("Hourly rate must be a positive value");
         }
 
-        checkOverlap(tutorId, startTime, endTime, null); // Check for overlap with existing sessions
 
-        Optional<Tutor> tutorOptional = tutorRepository.findById(tutorId);
- if (!tutorOptional.isPresent()) {
- throw new IllegalArgumentException("Tutor not found with ID: " + tutorId);
-        }
-        Tutor tutor = tutorOptional.get();
+        checkOverlap(tutorId, startTime, endTime, null);
 
-        Optional<Subject> subjectOptional = subjectRepository.findById(subjectId);
- if (!subjectOptional.isPresent()) {
- throw new IllegalArgumentException("Subject not found with ID: " + subjectId);
-        }
-        Subject subject = subjectOptional.get();
+        Tutor tutor = tutorRepository.findById(tutorId)
+                .orElseThrow(() -> new EntityNotFoundException("Tutor not found with ID: " + tutorId));
+
+        Subject subject = subjectRepository.findById(subjectId)
+                .orElseThrow(() -> new EntityNotFoundException("Subject not found with ID: " + subjectId));
+
 
         Session session = new Session();
         session.setTutor(tutor);
-        session.setSubject(subject.getName());
+        if (subject.getName() != null) {
+             session.setSubject(subject.getName());
+        } else {
+             session.setSubject("Unknown Subject"); // Handle null subject name
+        }
         session.setStartTime(startTime);
         session.setEndTime(endTime);
- session.setStatus(SessionStatus.SCHEDULED); // Initial status
+        session.setStatus(SessionStatus.SCHEDULED.name());
+        session.setHourlyRate(hourlyRate); // Set hourly rate
 
         return sessionRepository.save(session);
     }
 
     public Page<Session> getAllSessions(Pageable pageable) {
- return sessionRepository.findAll(pageable);
+        return sessionRepository.findAll(pageable);
     }
 
- public Page<Session> getAllSessionsForTutor(Long tutorId, Pageable pageable) {
-        Optional<Tutor> tutorOptional = tutorRepository.findById(tutorId);
-        if (tutorOptional.isPresent()) {
- return sessionRepository.findByTutor(tutorOptional.get(), pageable);
-        } else {
-            // Handle case where tutor is not found
- throw new IllegalArgumentException("Tutor not found with ID: " + tutorId);
-        }
+    public Page<Session> getAllSessionsForTutor(Long tutorId, Pageable pageable) {
+        Tutor tutor = tutorRepository.findById(tutorId)
+                .orElseThrow(() -> new EntityNotFoundException("Tutor not found with ID: " + tutorId));
+        return sessionRepository.findByTutor(tutor, pageable);
     }
 
     public Page<Session> getAllSessionsForStudent(Long studentId, Pageable pageable) {
-        // Assuming you have a way to find sessions by student ID in your SessionRepository
- return sessionRepository.findByStudentId(studentId, pageable);
-    // For now, let's assume sessions are listed for tutors
+        // Assuming Session has a ManyToOne relationship with Student
+        return sessionRepository.findByStudentId(studentId, pageable);
     }
 
+    @Transactional // Add Transactional annotation
     public Session updateSession(Long id, LocalDateTime startTime, LocalDateTime endTime, String status) {
         Session session = sessionRepository.findById(id)
- .orElseThrow(() -> new IllegalArgumentException("Session not found with ID: " + id));
+                .orElseThrow(() -> new EntityNotFoundException("Session not found with ID: " + id));
 
-        if (startTime != null) {
- // If only start time is updated, end time must be provided or already exist
- if (endTime == null && session.getEndTime() != null && startTime.isAfter(session.getEndTime())) {
- throw new IllegalArgumentException("Updated start time must be before existing end time");
- }
- session.setStartTime(startTime);
+        if (startTime != null && endTime != null) {
+             if (startTime.isAfter(endTime)) {
+                 throw new IllegalArgumentException("Start time must be before end time");
+             }
+             checkOverlap(session.getTutor().getId(), startTime, endTime, session.getId());
+             session.setStartTime(startTime);
+             session.setEndTime(endTime);
+        } else if (startTime != null) {
+             if (session.getEndTime() != null && startTime.isAfter(session.getEndTime())) {
+                 throw new IllegalArgumentException("Updated start time must be before existing end time");
+             }
+             checkOverlap(session.getTutor().getId(), startTime, session.getEndTime(), session.getId());
+             session.setStartTime(startTime);
+        } else if (endTime != null) {
+             if (session.getStartTime() != null && session.getStartTime().isAfter(endTime)) {
+                 throw new IllegalArgumentException("Updated end time must be after existing start time");
+             }
+             checkOverlap(session.getTutor().getId(), session.getStartTime(), endTime, session.getId());
+             session.setEndTime(endTime);
         }
 
-        if (endTime != null) {
- // If only end time is updated, start time must be provided or already exist
- if (startTime == null && session.getStartTime() != null && session.getStartTime().isAfter(endTime)) {
-                session.setEndTime(endTime);
- }
-            if (status != null && !status.isEmpty()) {
-                session.setStatus(status);
-            }
-            return sessionRepository.save(session);
-        } else {
- throw new IllegalArgumentException("Updated end time must be after updated start time");
-        }
-
- // Re-check overlap after potential time updates
- checkOverlap(session.getTutor().getId(), session.getStartTime(), session.getEndTime(), session.getId());
 
         if (status != null && !status.isEmpty()) {
- try {
- session.setStatus(SessionStatus.valueOf(status.toUpperCase()));
- } catch (IllegalArgumentException e) {
- throw new IllegalArgumentException("Invalid session status: " + status);
- }
+            try {
+                SessionStatus sessionStatus = SessionStatus.valueOf(status.toUpperCase());
+                session.setStatus(sessionStatus.name());
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("Invalid session status: " + status);
+            }
         }
 
- return sessionRepository.save(session);
+        return sessionRepository.save(session);
     }
 
-    public void cancelSession(Long id) {
-        Session session = sessionRepository.findById(id)
- .orElseThrow(() -> new IllegalArgumentException("Session not found with ID: " + id));
-        session.setStatus(SessionStatus.CANCELLED);
-        sessionRepository.save(session);
+    @Transactional // Add Transactional annotation
+    public boolean cancelSession(Long id) {
+        Optional<Session> sessionOptional = sessionRepository.findById(id);
+        if (sessionOptional.isPresent()) {
+            Session session = sessionOptional.get();
+            session.setStatus(SessionStatus.CANCELLED.name());
+            sessionRepository.save(session);
+            return true;
+        }
+        return false;
     }
 
- public void deleteSession(Long id) {
+    @Transactional // Add Transactional annotation
+    public void deleteSession(Long id) {
         Session session = sessionRepository.findById(id)
- .orElseThrow(() -> new IllegalArgumentException("Session not found with ID: " + id));
- // You might add checks here, e.g., only allow deleting if not booked
- sessionRepository.delete(session);
- }
+                .orElseThrow(() -> new EntityNotFoundException("Session not found with ID: " + id));
+        // You might add checks here, e.g., only allow deleting if not booked
+        sessionRepository.delete(session);
+    }
 
     public Session getSessionById(Long id) {
- return sessionRepository.findById(id)
- .orElseThrow(() -> new IllegalArgumentException("Session not found with ID: " + id));
+        return sessionRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Session not found with ID: " + id));
     }
 
+    @Transactional // Add Transactional annotation
     public Session completeSession(Long id) {
         Session session = sessionRepository.findById(id)
- .orElseThrow(() -> new IllegalArgumentException("Session not found with ID: " + id));
+                .orElseThrow(() -> new EntityNotFoundException("Session not found with ID: " + id));
 
- if (session.getStatus() != SessionStatus.SCHEDULED) {
- throw new IllegalStateException("Only scheduled sessions can be completed.");
- }
- // You might want to add more logic here, e.g., check if the session time has passed
+        if (!session.getStatus().equals(SessionStatus.SCHEDULED.name())) {
+            throw new IllegalStateException("Only scheduled sessions can be completed.");
+        }
+        // You might want to add more logic here, e.g., check if the session time has passed
 
-        session.setStatus(SessionStatus.COMPLETED);
-        sessionRepository.save(session);
+        session.setStatus(SessionStatus.COMPLETED.name());
+        return sessionRepository.save(session);
     }
 
-    // Helper method to check for overlapping sessions
     private void checkOverlap(Long tutorId, LocalDateTime startTime, LocalDateTime endTime, Long currentSessionId) {
-        List<Session> overlappingSessions = sessionRepository.findOverlappingSessions(tutorId, startTime, endTime);
-
-        if (currentSessionId != null) {
-            overlappingSessions.removeIf(session -> session.getId().equals(currentSessionId));
-        }
+        List<Session> overlappingSessions = sessionRepository.findOverlappingSessions(tutorId, startTime, endTime, currentSessionId); // Pass currentSessionId
 
         if (!overlappingSessions.isEmpty()) {
             throw new IllegalStateException("Tutor has overlapping sessions during this time.");
@@ -169,27 +179,47 @@ public class SessionService {
     }
 
     public Page<Session> searchSessions(String subject, LocalDate date, Long tutorId, LocalDateTime startTime, LocalDateTime endTime, String status, Pageable pageable) {
-        // Start with all sessions and apply filters based on provided parameters
-        // This is a basic implementation. For more complex filtering, consider using Specifications.
+        Specification<Session> spec = Specification.where(null);
 
-        if (subject != null && date == null && tutorId == null && startTime == null && endTime == null && status == null) {
-            return sessionRepository.findBySubject(subject, pageable);
-        } else if (startTime != null && endTime != null && subject == null && date == null && tutorId == null && status == null) {
- return sessionRepository.findByStartTimeBetween(startTime, endTime, pageable);
-        } else if (status != null && subject == null && date == null && tutorId == null && startTime == null && endTime == null) {
- try {
- return sessionRepository.findByStatus(SessionStatus.valueOf(status.toUpperCase()), pageable);
- } catch (IllegalArgumentException e) {
- throw new IllegalArgumentException("Invalid session status: " + status);
- }
-        } else if (tutorId != null && subject == null && date == null && startTime == null && endTime == null && status == null) {
- return sessionRepository.findByTutorId(tutorId, pageable);
+        if (subject != null && !subject.isEmpty()) {
+            spec = spec.and((root, query, criteriaBuilder) -> criteriaBuilder.like(criteriaBuilder.lower(root.get("subject")), "%" + subject.toLowerCase() + "%"));
         }
-        // Add more combinations of filters as needed.
-        // For complex combinations, Spring Data JPA Specifications are recommended.
 
-        // If no specific filters are provided, return all sessions with pagination
-        return sessionRepository.findAll(pageable);
+        if (date != null) {
+             LocalDateTime startOfDay = date.atStartOfDay();
+             LocalDateTime endOfDay = date.plusDays(1).atStartOfDay().minusNanos(1);
+             spec = spec.and((root, query, criteriaBuilder) -> criteriaBuilder.between(root.get("startTime"), startOfDay, endOfDay));
+        }
+
+        if (tutorId != null) {
+            spec = spec.and((root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("tutor").get("id"), tutorId));
+        }
+
+        if (startTime != null && endTime != null) {
+            spec = spec.and((root, query, criteriaBuilder) ->
+                 criteriaBuilder.and(
+                     criteriaBuilder.greaterThanOrEqualTo(root.get("startTime"), startTime),
+                     criteriaBuilder.lessThanOrEqualTo(root.get("endTime"), endTime)
+                 )
+            );
+        } else if (startTime != null) {
+             spec = spec.and((root, query, criteriaBuilder) -> criteriaBuilder.greaterThanOrEqualTo(root.get("startTime"), startTime));
+        } else if (endTime != null) {
+             spec = spec.and((root, query, criteriaBuilder) -> criteriaBuilder.lessThanOrEqualTo(root.get("endTime"), endTime));
+        }
+
+
+        if (status != null && !status.isEmpty()) {
+            try {
+                SessionStatus sessionStatus = SessionStatus.valueOf(status.toUpperCase());
+                spec = spec.and((root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("status"), sessionStatus.name()));
+            } catch (IllegalArgumentException e) {
+                 throw new IllegalArgumentException("Invalid session status: " + status);
+            }
+        }
+
+
+        return sessionRepository.findAll(spec, pageable);
     }
 
     // You will need to add this method to your SessionRepository:

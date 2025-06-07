@@ -11,7 +11,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.persistence.EntityNotFoundException;
+import jakarta.persistence.EntityNotFoundException; // Changed import to jakarta.persistence.EntityNotFoundException
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -20,9 +20,12 @@ import java.nio.file.StandardCopyOption;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.Set; // Import Set if roles are stored in a Set
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.transaction.annotation.Transactional; // Import Transactional
+
 
 @Service
 public class ResourceService {
@@ -51,16 +54,18 @@ public class ResourceService {
      * @return saved Resource entity
      * @throws IOException on file errors
      */
+    @Transactional // Add Transactional annotation
     public Resource uploadResource(MultipartFile file, Long userId, Long sessionId) throws IOException {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
+                .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId)); // Use EntityNotFoundException
 
+        // Ensure User model has getRoles() method that returns a Collection (like Set) of roles (Strings)
         if (!user.getRoles().contains("TUTOR")) {
             throw new AccessDeniedException("Only tutors can upload resources");
         }
 
         Session session = sessionRepository.findById(sessionId)
-                .orElseThrow(() -> new EntityNotFoundException("Session not found with ID: " + sessionId));
+                .orElseThrow(() -> new EntityNotFoundException("Session not found with ID: " + sessionId)); // Use EntityNotFoundException
 
         String originalFileName = file.getOriginalFilename();
         String uniqueFileName = UUID.randomUUID().toString() + "_" + originalFileName; // Generate unique file name
@@ -69,6 +74,7 @@ public class ResourceService {
         Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
         Resource resource = new Resource();
+        // Ensure Resource model has setFileName, setUrl, setUser, setSession, and setCreatedAt methods
         resource.setFileName(originalFileName);
         resource.setUrl(filePath.toString()); // Store file path as URL
         resource.setUser(user);
@@ -83,30 +89,35 @@ public class ResourceService {
     }
 
     public Page<Resource> getAllResources(Pageable pageable) {
-        return resourceRepository.findAll(pageable); // Pass pageable here!
+        return resourceRepository.findAll(pageable);
     }
 
     public Page<Resource> getResourcesByUserId(Long userId, Pageable pageable) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
+                .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId)); // Use EntityNotFoundException
+        // Ensure ResourceRepository has findByUser method
         return resourceRepository.findByUser(user, pageable);
     }
 
+    @Transactional // Add Transactional annotation
     public Resource updateResource(Long id, MultipartFile newFile, Long authenticatedUserId) throws IOException {
         Resource resource = resourceRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Resource not found with ID: " + id));
+                .orElseThrow(() -> new EntityNotFoundException("Resource not found with ID: " + id)); // Use EntityNotFoundException
 
+        // Ensure Resource model has getUser() method
         if (!resource.getUser().getId().equals(authenticatedUserId)) {
             throw new AccessDeniedException("You do not have permission to update this resource.");
         }
 
         // Delete old file if exists
         try {
+            // Ensure Resource model has getUrl() method
             Path oldFilePath = Paths.get(resource.getUrl());
             Files.deleteIfExists(oldFilePath);
         } catch (IOException e) {
             // Log or handle as needed
             System.err.println("Failed to delete old file: " + e.getMessage());
+            // Depending on your error handling strategy, you might throw a custom exception here
         }
 
         // Save the new file
@@ -116,6 +127,7 @@ public class ResourceService {
         Files.createDirectories(newFilePath.getParent());
         Files.copy(newFile.getInputStream(), newFilePath, StandardCopyOption.REPLACE_EXISTING);
 
+        // Ensure Resource model has setFileName, setUrl, and setCreatedAt methods
         resource.setFileName(originalFileName);
         resource.setUrl(newFilePath.toString());
         resource.setCreatedAt(Instant.now());
@@ -123,27 +135,39 @@ public class ResourceService {
         return resourceRepository.save(resource);
     }
 
+    @Transactional // Add Transactional annotation
     public void deleteResource(Long id, Long authenticatedUserId) {
         Resource resource = resourceRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Resource not found with ID: " + id));
+                .orElseThrow(() -> new EntityNotFoundException("Resource not found with ID: " + id)); // Use EntityNotFoundException
 
+        // Ensure Resource model has getUser() method
         if (!resource.getUser().getId().equals(authenticatedUserId)) {
             throw new AccessDeniedException("You do not have permission to delete this resource.");
         }
 
         // Delete file from file system
         try {
+            // Ensure Resource model has getUrl() method
             Path filePath = Paths.get(resource.getUrl());
             Files.deleteIfExists(filePath);
         } catch (IOException e) {
             // Log or handle as needed
             System.err.println("Failed to delete file: " + e.getMessage());
+            // Depending on your error handling strategy, you might throw a custom exception here
         }
 
         resourceRepository.deleteById(id);
     }
 
     public Page<Resource> getResourcesBySessionId(Long sessionId, Pageable pageable) {
+        // Ensure ResourceRepository has findBySessionId method
         return resourceRepository.findBySessionId(sessionId, pageable);
     }
+
+    // You will likely need these methods in your ResourceRepository:
+    // Page<Resource> findByUser(User user, Pageable pageable);
+    // Page<Resource> findBySessionId(Long sessionId, Pageable pageable);
+
+    // You need to ensure your User model has a method like getRoles()
+    // that returns a collection of roles (e.g., Set<String>).
 }

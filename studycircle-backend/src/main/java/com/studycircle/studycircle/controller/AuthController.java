@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.studycircle.studycircle.service.UserService; // Assuming you have a UserService
+import com.studycircle.studycircle.service.UserService;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -34,7 +34,7 @@ public class AuthController {
     private UserDetailsService userDetailsService; // Inject CustomUserDetailsService through its interface
 
     @Autowired
-    private UserService userService; // Autowire the UserService
+    private UserService userService;
 
     @PostMapping("/login")
     public ResponseEntity<?> createAuthenticationToken(@RequestBody AuthenticationRequest authenticationRequest)
@@ -51,7 +51,7 @@ public class AuthController {
         final UserDetails userDetails = userDetailsService
                 .loadUserByUsername(authenticationRequest.getUsername());
 
-        final String jwt = jwtUtil.generateToken(userDetails.getUsername());
+        final String jwt = jwtUtil.generateToken(userDetails);
 
         Map<String, String> response = new HashMap<>();
         response.put("token", jwt);
@@ -64,13 +64,12 @@ public class AuthController {
         logger.info("Received registration request for username: {}", registerRequest.getUsername());
         try {
             logger.info("Calling userService.registerNewUser...");
-            // Assuming userService has a method to handle user registration
-            // This method should handle password encryption and saving the user
             userService.registerNewUser(registerRequest.getFullName(), registerRequest.getUsername(),
                     registerRequest.getPassword());
             logger.info("User registration successful for username: {}", registerRequest.getUsername());
             return ResponseEntity.ok("User registered successfully!");
-        } catch (Exception e) { // Catch a more specific exception if your service throws one
+        } catch (Exception e) {
+            logger.error("Error during registration for username: {}", registerRequest.getUsername(), e);
             return ResponseEntity.badRequest().body("Error during registration: " + e.getMessage());
         }
     }
@@ -104,7 +103,7 @@ public class AuthController {
         public void setPassword(String password) {
             this.password = password;
         }
-    }
+    } // Closing brace for RegisterRequest
 
     // Request body class for login
     static class AuthenticationRequest {
@@ -126,5 +125,5 @@ public class AuthController {
         public void setPassword(String password) {
             this.password = password;
         }
-    }
-}
+    } // Closing brace for AuthenticationRequest
+} // Closing brace for AuthController

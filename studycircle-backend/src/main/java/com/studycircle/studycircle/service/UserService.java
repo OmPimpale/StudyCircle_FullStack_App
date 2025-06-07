@@ -3,8 +3,8 @@ package com.studycircle.studycircle.service;
 import com.studycircle.studycircle.model.Student;
 import com.studycircle.studycircle.model.Tutor;
 import com.studycircle.studycircle.model.Notification;
-import com.studycircle.studycircle.model.User;
-import com.studycircle.studycircle.repository.NotificationRepository;
+import com.studycircle.studycircle.model.User; // Import User
+import com.studycircle.studycircle.repository.NotificationRepository; // Import NotificationRepository
 import com.studycircle.studycircle.repository.StudentRepository;
 import com.studycircle.studycircle.repository.TutorRepository;
 import com.studycircle.studycircle.repository.UserRepository;
@@ -17,11 +17,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.mail.MailException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import jakarta.persistence.EntityNotFoundException; // Import EntityNotFoundException
+import org.springframework.transaction.annotation.Transactional; // Import Transactional
+
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
-import jakarta.persistence.EntityNotFoundException;
+
 
 import java.util.List;
 
@@ -34,27 +37,30 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final StudentRepository studentRepository;
     private final TutorRepository tutorRepository;
-    private final EmailService emailService; // Inject EmailService
-    private final notificationRepository notificationRepository; // Inject NotificationRepository
+    private final NotificationService notificationService; // Inject NotificationService
+    private final NotificationRepository notificationRepository; // Corrected type
 
     @Autowired
     public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder,
-            StudentRepository studentRepository, TutorRepository tutorRepository, EmailService emailService,
-            NotificationRepository notificationRepository) {
-        this.studentRepository = studentRepository;
-        this.tutorRepository = tutorRepository;
-        this.notificationRepository = notificationRepository;
+                       StudentRepository studentRepository, TutorRepository tutorRepository,
+                       NotificationService notificationService, // Corrected type
+                       NotificationRepository notificationRepository) { // Corrected type
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-        this.emailService = emailService;
+        this.studentRepository = studentRepository;
+        this.tutorRepository = tutorRepository;
+        this.notificationService = notificationService; // Corrected assignment
+        this.notificationRepository = notificationRepository;
     }
 
     // Basic method to find a user by username
+    // Ensure UserRepository has findByUsername(String username) method
     public User findByUsername(String username) {
         return userRepository.findByUsername(username);
     }
 
     // Method to find a user by email (needed for password reset)
+    // Ensure UserRepository has findByEmail(String email) method
     public User findByEmail(String email) {
         return userRepository.findByEmail(email);
     }
@@ -64,6 +70,7 @@ public class UserService {
         return userRepository.findById(id);
     }
 
+    @Transactional // Add Transactional annotation
     public User registerNewUser(String fullName, String username, String password) {
         logger.info("Attempting to register new user with username: {}", username);
         // Basic validation
@@ -81,6 +88,7 @@ public class UserService {
 
         // Check if email is already in use
         logger.info("Checking if email already exists for username: {}", username);
+        // Ensure UserRepository has findByEmail(String email) method
         if (userRepository.findByEmail(username) != null) {
             logger.warn("Registration failed: Email address already registered for username: {}", username);
             throw new IllegalArgumentException("Email address is already registered.");
@@ -89,6 +97,7 @@ public class UserService {
 
         User newUser = new User();
         // Assuming username is the email
+        // Ensure User model has setUsername, setEmail, setPassword, setRole, setFirstName, setLastName methods
         newUser.setUsername(username);
         newUser.setEmail(username); // Set email field as well
         logger.info("Encoding password for username: {}", username);
@@ -107,15 +116,19 @@ public class UserService {
             // level
             throw new IllegalArgumentException("Email address is already registered.", e);
         } catch (Exception e) {
+            logger.error("Error during user registration for username: {}", username, e);
             throw new RuntimeException("Error during user registration.", e);
         }
     }
 
     // Method to initiate password reset
+    @Transactional // Add Transactional annotation
     public boolean initiatePasswordReset(String email) {
+        // Ensure UserRepository has findByEmail(String email) method
         User user = userRepository.findByEmail(email);
         if (user != null) {
             String token = UUID.randomUUID().toString();
+            // Ensure User model has setResetPasswordToken and setResetPasswordExpiry methods
             user.setResetPasswordToken(token);
             user.setResetPasswordExpiry(LocalDateTime.now().plusHours(24)); // Token expires in 24 hours
             userRepository.save(user);
@@ -123,14 +136,16 @@ public class UserService {
             try {
                 // Send email with reset link
                 String resetLink = "YOUR_FRONTEND_RESET_PASSWORD_URL?token=" + token; // Replace with your frontend URL
-                emailService.sendEmail(
-                        user.getEmail(),
+                // Ensure NotificationService has sendNotificationEmail method
+                notificationService.sendNotificationEmail( // Corrected method call
+                        user.getEmail(), // Ensure User model has getEmail() method
                         "Password Reset Request for StudyCircle",
                         "To reset your password, click on the following link: " + resetLink
                                 + "\n\nThis link will expire in 24 hours.");
             } catch (MailException e) {
                 // Log email sending failure, but don't prevent the token from being saved
                 System.err.println("Failed to send password reset email: " + e.getMessage());
+                logger.error("Failed to send password reset email to {}: {}", user.getEmail(), e.getMessage(), e);
             }
             return true;
         }
@@ -138,13 +153,16 @@ public class UserService {
     }
 
     // Method to confirm password reset
+    @Transactional // Add Transactional annotation
     public boolean confirmPasswordReset(String token, String newPassword) {
+        // Ensure UserRepository has findByResetPasswordToken(String token) method
         User user = userRepository.findByResetPasswordToken(token);
+        // Ensure User model has getResetPasswordExpiry() method
         if (user != null && user.getResetPasswordExpiry() != null
                 && user.getResetPasswordExpiry().isAfter(LocalDateTime.now())) {
-            user.setPassword(passwordEncoder.encode(newPassword));
-            user.setResetPasswordToken(null);
-            user.setResetPasswordExpiry(null);
+            user.setPassword(passwordEncoder.encode(newPassword)); // Ensure User model has setPassword method
+            user.setResetPasswordToken(null); // Ensure User model has setResetPasswordToken method
+            user.setResetPasswordExpiry(null); // Ensure User model has setResetPasswordExpiry method
             userRepository.save(user);
             return true;
         }
@@ -152,28 +170,33 @@ public class UserService {
     }
 
     // Method to create or update student profile
+    @Transactional // Add Transactional annotation
     public Student createOrUpdateStudentProfile(Long userId, Student studentProfile) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + userId));
+                .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId)); // Use EntityNotFoundException
         if (studentProfile == null) {
             throw new IllegalArgumentException("Student profile data cannot be null.");
         }
+        // Ensure Student model has setUser method
         studentProfile.setUser(user);
         return studentRepository.save(studentProfile);
     }
 
     // Method to create or update tutor profile
+    @Transactional // Add Transactional annotation
     public Tutor createOrUpdateTutorProfile(Long userId, Tutor tutorProfile) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + userId));
+                .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId)); // Use EntityNotFoundException
         if (tutorProfile == null) {
             throw new IllegalArgumentException("Tutor profile data cannot be null.");
         }
+        // Ensure Tutor model has setUser method
         tutorProfile.setUser(user);
         return tutorRepository.save(tutorProfile);
     }
 
     // Method to update user details
+    @Transactional // Add Transactional annotation
     public User updateUser(Long id, User updatedUser) {
         Optional<User> existingUserOptional = userRepository.findById(id);
 
@@ -181,10 +204,11 @@ public class UserService {
             User existingUser = existingUserOptional.get();
             // Add validation for updatedUser fields if necessary
             // For example, validate email format if email is being updated
+            // You might want to update specific fields from updatedUser to existingUser
 
             return userRepository.save(existingUser);
         } else {
-            throw new IllegalArgumentException("User not found with ID: " + id);
+            throw new EntityNotFoundException("User not found with ID: " + id); // Use EntityNotFoundException
         }
     }
 
@@ -192,6 +216,7 @@ public class UserService {
     public Page<Notification> getNotificationsByUserId(Long userId, Pageable pageable) {
         Optional<User> userOptional = userRepository.findById(userId);
         if (userOptional.isPresent()) {
+            // Ensure NotificationRepository has findByUserIdOrderByCreatedAtDesc method
             return notificationRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable);
         }
         return Page.empty(pageable); // Return an empty page if user not found
@@ -203,24 +228,47 @@ public class UserService {
     }
 
     // Method to mark a notification as read
+    @Transactional // Add Transactional annotation
     public Notification markNotificationAsRead(Long notificationId, Long userId) {
         Notification notification = notificationRepository.findById(notificationId)
-                .orElseThrow(() -> new EntityNotFoundException("Notification not found with ID: " + notificationId));
+                .orElseThrow(() -> new EntityNotFoundException("Notification not found with ID: " + notificationId)); // Use EntityNotFoundException
 
+        // Ensure Notification model has getUser() method
         if (!notification.getUser().getId().equals(userId)) {
             throw new IllegalStateException("User is not the owner of this notification.");
         }
+        // Ensure Notification model has setReadStatus method
         notification.setReadStatus(true);
         return notificationRepository.save(notification);
     }
 
     // Method to count the number of students
+    // Ensure UserRepository has countByRole(String role) method
     public long countStudents() {
         return userRepository.countByRole("STUDENT");
     }
 
     // Method to count the number of tutors
+    // Ensure UserRepository has countByRole(String role) method
     public long countTutors() {
         return userRepository.countByRole("TUTOR");
     }
+
+    // You will likely need these methods in your UserRepository:
+    // User findByUsername(String username);
+    // User findByEmail(String email);
+    // User findByResetPasswordToken(String token);
+    // long countByRole(String role);
+
+    // You will also need to ensure your User model has:
+    // - Getter and setter methods for username, email, password, role, firstName, lastName
+    // - Getter and setter methods for resetPasswordToken and resetPasswordExpiry
+    // - A method to get roles (e.g., getRoles() which returns a collection like Set<String>)
+
+    // You will need to ensure your Notification model has:
+    // - Getter for user (getUser())
+    // - Setter for readStatus (setReadStatus(boolean))
+
+    // You will need to ensure your NotificationRepository has:
+    // - Page<Notification> findByUserIdOrderByCreatedAtDesc(Long userId, Pageable pageable);
 }

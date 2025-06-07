@@ -20,7 +20,7 @@ import java.io.IOException;
 public class JwtRequestFilter extends OncePerRequestFilter {
 
     @Autowired
-    private JwtUtil jwtUtil;
+    private JwtUtil jwtUtil; // Assuming JwtUtil is correctly implemented
 
     @Autowired
     private CustomUserDetailsService customUserDetailsService;
@@ -49,6 +49,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
             UserDetails userDetails = this.customUserDetailsService.loadUserByUsername(username);
 
+            // Assuming JwtUtil.validateToken takes token and UserDetails
             if (jwtUtil.validateToken(jwt, userDetails)) {
 
                 UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(

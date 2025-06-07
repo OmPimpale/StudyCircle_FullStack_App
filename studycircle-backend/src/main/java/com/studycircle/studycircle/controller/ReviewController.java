@@ -11,8 +11,12 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.*;
+import jakarta.persistence.EntityNotFoundException; // Import EntityNotFoundException
 
+import java.time.LocalDateTime; // Import LocalDateTime
+import java.time.format.DateTimeParseException; // Import DateTimeParseException
 import java.util.List;
+
 @RestController
 @RequestMapping("/api/reviews")
 public class ReviewController {
@@ -25,9 +29,13 @@ public class ReviewController {
     }
 
     // Add API endpoints for reviews here
- @PostMapping
-    public ResponseEntity<Review> addReview(@RequestBody Review review) {
-        Review createdReview = reviewService.createNewReview(review);
+    @PostMapping
+    public ResponseEntity<Review> addReview(@RequestParam Long sessionId,
+                                            @RequestParam Long userId,
+                                            @RequestParam int rating,
+                                            @RequestParam String comment) {
+        // Call createReview method from ReviewService with individual parameters
+        Review createdReview = reviewService.createReview(sessionId, userId, rating, comment);
         return new ResponseEntity<>(createdReview, HttpStatus.CREATED);
     }
 
@@ -41,21 +49,26 @@ public class ReviewController {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
 
- @GetMapping("/session/{sessionId}")
+    @GetMapping("/session/{sessionId}")
     public ResponseEntity<Page<Review>> getReviewsForSession(@PathVariable Long sessionId, Pageable pageable) {
- Page<Review> reviews = reviewService.getReviewsForSession(sessionId, pageable);
- return new ResponseEntity<>(reviews, HttpStatus.OK);
-    }
-
- @GetMapping("/user/{userId}")
-    public ResponseEntity<Page<Review>> getReviewsByUserId(@PathVariable Long userId, Pageable pageable) {
- Page<Review> reviews = reviewService.getReviewsByUserId(userId, pageable);
+        // Call getReviewsBySession method from ReviewService
+        Page<Review> reviews = reviewService.getReviewsBySession(sessionId, pageable);
         return new ResponseEntity<>(reviews, HttpStatus.OK);
     }
 
- @PutMapping("/{id}")
-    public ResponseEntity<Review> updateReview(@PathVariable Long id, @RequestBody Review updatedReview) {
- Review review = reviewService.updateReview(id, updatedReview);
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<Page<Review>> getReviewsByUserId(@PathVariable Long userId, Pageable pageable) {
+        // Call getReviewsByUser method from ReviewService
+        Page<Review> reviews = reviewService.getReviewsByUser(userId, pageable);
+        return new ResponseEntity<>(reviews, HttpStatus.OK);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Review> updateReview(@PathVariable Long id,
+                                              @RequestParam int rating,
+                                              @RequestParam String comment) {
+        // Call updateReview method from ReviewService with individual parameters
+        Review review = reviewService.updateReview(id, rating, comment);
         return new ResponseEntity<>(review, HttpStatus.OK);
     }
 
@@ -68,13 +81,28 @@ public class ReviewController {
     @GetMapping("/search")
     public ResponseEntity<Page<Review>> searchReviews(
             @RequestParam(required = false) Integer rating,
-            @RequestParam(required = false) String startDate, // Assuming date as String for simplicity, parse in service
-            @RequestParam(required = false) String endDate, // Assuming date as String for simplicity, parse in service
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate,
             @RequestParam(required = false) Long sessionId,
             @RequestParam(required = false) Long userId,
             Pageable pageable) {
-        // Pass null for LocalDateTime parsing in service for now.
-        Page<Review> reviews = reviewService.searchReviews(rating, null, null, sessionId, userId, pageable);
+
+        LocalDateTime startDateTime = null;
+        LocalDateTime endDateTime = null;
+
+        try {
+            if (startDate != null && !startDate.isEmpty()) {
+                startDateTime = LocalDateTime.parse(startDate); // Assuming ISO 8601 format
+            }
+            if (endDate != null && !endDate.isEmpty()) {
+                endDateTime = LocalDateTime.parse(endDate); // Assuming ISO 8601 format
+            }
+        } catch (DateTimeParseException e) {
+            return ResponseEntity.badRequest().body("Invalid date format. Please use ISO 8601 format (e.g., YYYY-MM-DDThh:mm:ss).");
+        }
+
+
+        Page<Review> reviews = reviewService.searchReviews(rating, startDateTime, endDateTime, sessionId, userId, pageable);
         return new ResponseEntity<>(reviews, HttpStatus.OK);
     }
 }
