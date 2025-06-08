@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
 
+
 import java.util.List;
 
 @Service
@@ -41,9 +42,9 @@ public class UserService {
 
     @Autowired
     public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder,
-            StudentRepository studentRepository, TutorRepository tutorRepository,
-            NotificationService notificationService, // Corrected type
-            NotificationRepository notificationRepository) { // Corrected type
+                       StudentRepository studentRepository, TutorRepository tutorRepository,
+                       NotificationService notificationService, // Corrected type
+                       NotificationRepository notificationRepository) { // Corrected type
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.studentRepository = studentRepository;
@@ -59,7 +60,7 @@ public class UserService {
     }
 
     // Method to find a user by email (needed for password reset)
-    // Ensure UserRepository has findByEmail(String email) method
+    // Ensure UserRepository has findByEmail(String email) method that returns Optional<User>
     public Optional<User> findByEmail(String email) {
         return userRepository.findByEmail(email);
     }
@@ -96,8 +97,7 @@ public class UserService {
 
         User newUser = new User();
         // Assuming username is the email
-        // Ensure User model has setUsername, setEmail, setPassword, setRole,
-        // setFirstName, setLastName methods
+        // Ensure User model has setUsername, setEmail, setPassword, setRole, setFirstName, setLastName methods
         newUser.setUsername(username);
         newUser.setEmail(username); // Set email field as well
         logger.info("Encoding password for username: {}", username);
@@ -129,8 +129,7 @@ public class UserService {
         if (userOptional.isPresent()) {
             User user = userOptional.get();
             String token = UUID.randomUUID().toString();
-            // Ensure User model has setResetPasswordToken and setResetPasswordExpiry
-            // methods
+            // Ensure User model has setResetPasswordToken and setResetPasswordExpiry methods
             user.setResetPasswordToken(token);
             user.setResetPasswordExpiry(LocalDateTime.now().plusHours(24)); // Token expires in 24 hours
             userRepository.save(user);
@@ -157,13 +156,13 @@ public class UserService {
     // Method to confirm password reset
     @Transactional // Add Transactional annotation
     public boolean confirmPasswordReset(String token, String newPassword) {
-        // Ensure UserRepository has findByResetPasswordToken(String token) method
+        // Ensure UserRepository has findByResetPasswordToken(String token) method that returns Optional<User>
         Optional<User> userOptional = userRepository.findByResetPasswordToken(token);
         // Ensure User model has getResetPasswordExpiry() method
         if (userOptional.isPresent()) {
             User user = userOptional.get();
-            if (user.getResetPasswordExpiry() != null
-                    && user.getResetPasswordExpiry().isAfter(LocalDateTime.now())) {
+             if (user.getResetPasswordExpiry() != null
+                && user.getResetPasswordExpiry().isAfter(LocalDateTime.now())) {
                 user.setPassword(passwordEncoder.encode(newPassword)); // Ensure User model has setPassword method
                 user.setResetPasswordToken(null); // Ensure User model has setResetPasswordToken method
                 user.setResetPasswordExpiry(null); // Ensure User model has setResetPasswordExpiry method
@@ -178,8 +177,7 @@ public class UserService {
     @Transactional // Add Transactional annotation
     public Student createOrUpdateStudentProfile(Long userId, Student studentProfile) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId)); // Use
-                                                                                                      // EntityNotFoundException
+                .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId)); // Use EntityNotFoundException
         if (studentProfile == null) {
             throw new IllegalArgumentException("Student profile data cannot be null.");
         }
@@ -192,8 +190,7 @@ public class UserService {
     @Transactional // Add Transactional annotation
     public Tutor createOrUpdateTutorProfile(Long userId, Tutor tutorProfile) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId)); // Use
-                                                                                                      // EntityNotFoundException
+                .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId)); // Use EntityNotFoundException
         if (tutorProfile == null) {
             throw new IllegalArgumentException("Tutor profile data cannot be null.");
         }
@@ -224,8 +221,8 @@ public class UserService {
     @Transactional // Add Transactional annotation
     public User updateUser(Long id, User updatedUser) {
         User existingUser = userRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + id)); // Use
-                                                                                                  // EntityNotFoundException
+                 .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + id)); // Use EntityNotFoundException
+
 
         // Add validation for updatedUser fields if necessary
         // For example, validate email format if email is being updated
@@ -235,6 +232,7 @@ public class UserService {
         // existingUser.setLastName(updatedUser.getLastName());
         // existingUser.setEmail(updatedUser.getEmail());
         // ... and so on for other fields you allow to be updated
+
 
         return userRepository.save(existingUser);
     }
@@ -249,12 +247,16 @@ public class UserService {
         return Page.empty(pageable); // Return an empty page if user not found
     }
 
+    // Method to get all users with pagination
+    public Page<User> getAllUsers(Pageable pageable) {
+        return userRepository.findAll(pageable);
+    }
+
     // Method to mark a notification as read
     @Transactional // Add Transactional annotation
     public Notification markNotificationAsRead(Long notificationId, Long userId) {
         Notification notification = notificationRepository.findById(notificationId)
-                .orElseThrow(() -> new EntityNotFoundException("Notification not found with ID: " + notificationId)); // Use
-                                                                                                                      // EntityNotFoundException
+                .orElseThrow(() -> new EntityNotFoundException("Notification not found with ID: " + notificationId)); // Use EntityNotFoundException
 
         // Ensure Notification model has getUser() method
         if (!notification.getUser().getId().equals(userId)) {
@@ -284,19 +286,16 @@ public class UserService {
     // long countByRole(String role);
 
     // You will also need to ensure your User model has:
-    // - Getter and setter methods for username, email, password, role, firstName,
-    // lastName
+    // - Getter and setter methods for username, email, password, role, firstName, lastName
     // - Getter and setter methods for resetPasswordToken and resetPasswordExpiry
-    // - A method to get roles (e.g., getRoles() which returns a collection like
-    // Set<String>)
+    // - A method to get roles (e.g., getRoles() which returns a collection like Set<String>)
 
     // You will need to ensure your Notification model has:
     // - Getter for user (getUser())
     // - Setter for readStatus (setReadStatus(boolean))
 
     // You will need to ensure your NotificationRepository has:
-    // - Page<Notification> findByUser_IdOrderByCreatedAtDesc(Long userId, Pageable
-    // pageable);
+    // - Page<Notification> findByUser_IdOrderByCreatedAtDesc(Long userId, Pageable pageable);
 
     // You will need to ensure your StudentRepository has:
     // - Optional<Student> findByUser(User user); or findByUserId(Long userId);

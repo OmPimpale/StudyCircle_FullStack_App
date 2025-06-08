@@ -20,11 +20,10 @@ import jakarta.persistence.EntityNotFoundException; // Import EntityNotFoundExce
 
 
 import java.util.List;
+import java.util.Optional; // Keep one Optional import
 import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-// Remove duplicate import: import java.util.Optional;
-import java.util.Optional; // Keep one Optional import
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -65,11 +64,10 @@ public class UserController {
 
     @GetMapping("/me")
     public ResponseEntity<?> getLoggedInUser(Principal principal) {
-        // Assuming userService.findByUsername returns a User (not Optional)
-        User user = userService.findByUsername(principal.getName());
-        if (user == null) { // Check if user is null
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        // Assuming userService.findByUsername returns Optional<User>
+        User user = userService.findByUsername(principal.getName())
+                .orElseThrow(() -> new EntityNotFoundException("User not found")); // Handle Optional
+
         // Ensure User model has getRole() and getId() methods
         if ("STUDENT".equals(user.getRole())) {
             // Assuming userService has getStudentProfile(Long userId) method that returns Optional<Student>
@@ -112,11 +110,9 @@ public class UserController {
     @PostMapping("/student-profile")
     public ResponseEntity<Student> createOrUpdateStudentProfile(Principal principal, @RequestBody Student studentProfile) {
         try {
-            // Assuming userService.findByUsername returns a User (not Optional)
-            User user = userService.findByUsername(principal.getName());
-            if (user == null) { // Check if user is null
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-            }
+            // Assuming userService.findByUsername returns Optional<User>
+            User user = userService.findByUsername(principal.getName())
+                    .orElseThrow(() -> new EntityNotFoundException("User not found")); // Handle Optional
             // Ensure User model has getId() method
             Student updatedProfile = userService.createOrUpdateStudentProfile(user.getId(), studentProfile);
             return new ResponseEntity<>(updatedProfile, HttpStatus.OK);
@@ -131,11 +127,9 @@ public class UserController {
     @PostMapping("/tutor-profile")
     public ResponseEntity<Tutor> createOrUpdateTutorProfile(Principal principal, @RequestBody Tutor tutorProfile) {
         try {
-            // Assuming userService.findByUsername returns a User (not Optional)
-            User user = userService.findByUsername(principal.getName());
-             if (user == null) { // Check if user is null
-                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-             }
+            // Assuming userService.findByUsername returns Optional<User>
+            User user = userService.findByUsername(principal.getName())
+                    .orElseThrow(() -> new EntityNotFoundException("User not found")); // Handle Optional
             // Ensure User model has getId() method
             Tutor updatedProfile = userService.createOrUpdateTutorProfile(user.getId(), tutorProfile);
             return new ResponseEntity<>(updatedProfile, HttpStatus.OK);
