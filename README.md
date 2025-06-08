@@ -17,3 +17,4 @@ If you are developing a production application, we recommend using TypeScript wi
 
 <!-- mvn clean install -->
 <!-- java -jar studycircle-0.0.1-SNAPSHOT.jar -->
+<!-- mvn spring-boot:run -->

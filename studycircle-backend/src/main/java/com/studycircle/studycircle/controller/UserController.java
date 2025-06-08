@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import jakarta.persistence.EntityNotFoundException; // Import EntityNotFoundException
 
-
 import java.util.List;
 import java.util.Optional; // Keep one Optional import
 import org.springframework.data.web.PageableDefault;
@@ -37,7 +36,6 @@ public class UserController {
         this.userService = userService;
     }
 
-
     // Add controller methods here
 
     @GetMapping
@@ -48,16 +46,18 @@ public class UserController {
 
     @PostMapping("/register") // Updated to match service method signature
     public ResponseEntity<?> registerUser(@RequestBody RegisterRequest registerRequest) { // Use RegisterRequest DTO
+        System.out.println("Received registration request for username: " + registerRequest.getUsername());
         try {
             // Call registerNewUser method from UserService
-            User registeredUser = userService.registerNewUser(registerRequest.getFullName(), registerRequest.getUsername(), registerRequest.getPassword());
+            User registeredUser = userService.registerNewUser(registerRequest.getFullName(),
+                    registerRequest.getUsername(), registerRequest.getPassword());
             return new ResponseEntity<>(registeredUser, HttpStatus.CREATED);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage()); // Return error message in body
         } catch (IllegalStateException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage()); // Return error message in body
         } catch (Exception e) {
-             // Log the error: logger.error("Error during user registration", e);
+            // Log the error: logger.error("Error during user registration", e);
             return new ResponseEntity<>("Error during registration", HttpStatus.INTERNAL_SERVER_ERROR); // Generic error
         }
     }
@@ -70,22 +70,25 @@ public class UserController {
 
         // Ensure User model has getRole() and getId() methods
         if ("STUDENT".equals(user.getRole())) {
-            // Assuming userService has getStudentProfile(Long userId) method that returns Optional<Student>
+            // Assuming userService has getStudentProfile(Long userId) method that returns
+            // Optional<Student>
             Optional<Student> studentProfileOptional = userService.getStudentProfile(user.getId());
             if (studentProfileOptional.isPresent()) {
                 return new ResponseEntity<>(studentProfileOptional.get(), HttpStatus.OK);
             } else {
-                // If student profile not found, return user details or NOT_FOUND for the profile
+                // If student profile not found, return user details or NOT_FOUND for the
+                // profile
                 return new ResponseEntity<>(user, HttpStatus.OK); // Or HttpStatus.NOT_FOUND for the profile
             }
         } else if ("TUTOR".equals(user.getRole())) {
-            // Assuming userService has getTutorProfile(Long userId) method that returns Optional<Tutor>
+            // Assuming userService has getTutorProfile(Long userId) method that returns
+            // Optional<Tutor>
             Optional<Tutor> tutorProfileOptional = userService.getTutorProfile(user.getId());
             if (tutorProfileOptional.isPresent()) {
-                 return new ResponseEntity<>(tutorProfileOptional.get(), HttpStatus.OK);
+                return new ResponseEntity<>(tutorProfileOptional.get(), HttpStatus.OK);
             } else {
                 // If tutor profile not found, return user details or NOT_FOUND for the profile
-                 return new ResponseEntity<>(user, HttpStatus.OK); // Or HttpStatus.NOT_FOUND for the profile
+                return new ResponseEntity<>(user, HttpStatus.OK); // Or HttpStatus.NOT_FOUND for the profile
             }
         }
         return new ResponseEntity<>(user, HttpStatus.OK);
@@ -94,7 +97,8 @@ public class UserController {
     @PutMapping("/{id}")
     public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User updatedUser) {
         try {
-            // Assuming userService.updateUser returns a User or throws EntityNotFoundException
+            // Assuming userService.updateUser returns a User or throws
+            // EntityNotFoundException
             User user = userService.updateUser(id, updatedUser);
             return new ResponseEntity<>(user, HttpStatus.OK);
         } catch (EntityNotFoundException ex) { // Catch EntityNotFoundException
@@ -102,13 +106,14 @@ public class UserController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(null); // Or a custom error response body
         } catch (Exception ex) {
-             // Log the error: logger.error("Error updating user", ex);
+            // Log the error: logger.error("Error updating user", ex);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR); // Generic error
         }
     }
 
     @PostMapping("/student-profile")
-    public ResponseEntity<Student> createOrUpdateStudentProfile(Principal principal, @RequestBody Student studentProfile) {
+    public ResponseEntity<Student> createOrUpdateStudentProfile(Principal principal,
+            @RequestBody Student studentProfile) {
         try {
             // Assuming userService.findByUsername returns Optional<User>
             User user = userService.findByUsername(principal.getName())
@@ -119,7 +124,7 @@ public class UserController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(null); // Or a custom error response body
         } catch (Exception ex) {
-             // Log the error: logger.error("Error creating/updating student profile", ex);
+            // Log the error: logger.error("Error creating/updating student profile", ex);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR); // Generic error
         }
     }
@@ -136,7 +141,7 @@ public class UserController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(null); // Or a custom error response body
         } catch (Exception ex) {
-             // Log the error: logger.error("Error creating/updating tutor profile", ex);
+            // Log the error: logger.error("Error creating/updating tutor profile", ex);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR); // Generic error
         }
     }
@@ -152,19 +157,25 @@ public class UserController {
 
     @PostMapping("/reset-password")
     public ResponseEntity<Void> confirmPasswordReset(@RequestBody ResetPasswordRequest resetPasswordRequest) {
-        boolean success = userService.confirmPasswordReset(resetPasswordRequest.getToken(), resetPasswordRequest.getNewPassword());
-        return success ? new ResponseEntity<>(HttpStatus.OK) : new ResponseEntity<>(HttpStatus.BAD_REQUEST); // Or another suitable status
+        boolean success = userService.confirmPasswordReset(resetPasswordRequest.getToken(),
+                resetPasswordRequest.getNewPassword());
+        return success ? new ResponseEntity<>(HttpStatus.OK) : new ResponseEntity<>(HttpStatus.BAD_REQUEST); // Or
+                                                                                                             // another
+                                                                                                             // suitable
+                                                                                                             // status
     }
 
     @GetMapping("/{userId}/notifications")
-    public ResponseEntity<Page<Notification>> getUserNotifications(@PathVariable Long userId, @PageableDefault(size = 10, sort = "createdAt", direction = org.springframework.data.domain.Sort.Direction.DESC) Pageable pageable) {
+    public ResponseEntity<Page<Notification>> getUserNotifications(@PathVariable Long userId,
+            @PageableDefault(size = 10, sort = "createdAt", direction = org.springframework.data.domain.Sort.Direction.DESC) Pageable pageable) {
         // Call getNotificationsByUserId method from UserService
         Page<Notification> notifications = userService.getNotificationsByUserId(userId, pageable);
         return new ResponseEntity<>(notifications, HttpStatus.OK);
     }
 
     @PutMapping("/{userId}/notifications/{notificationId}/mark-as-read")
-    public ResponseEntity<Void> markNotificationAsRead(@PathVariable Long userId, @PathVariable Long notificationId, Principal principal) {
+    public ResponseEntity<Void> markNotificationAsRead(@PathVariable Long userId, @PathVariable Long notificationId,
+            Principal principal) {
         try {
             // Call markNotificationAsRead method from UserService with 2 arguments
             userService.markNotificationAsRead(notificationId, userId); // Order might matter, check service method
@@ -174,9 +185,9 @@ public class UserController {
         } catch (IllegalStateException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         } catch (EntityNotFoundException ex) { // Catch EntityNotFoundException
-             return new ResponseEntity<>(HttpStatus.NOT_FOUND); // Notification not found
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND); // Notification not found
         } catch (Exception ex) {
-             // Log the error: logger.error("Error marking notification as read", ex);
+            // Log the error: logger.error("Error marking notification as read", ex);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR); // Generic error
         }
     }

@@ -147,21 +147,26 @@ public class User {
 
     // Method to get roles (for security context)
     public Collection<String> getRoles() {
-        // Assuming the 'role' field stores a single role string like "ROLE_STUDENT" or "ROLE_TUTOR"
-        // If your roles are stored differently (e.g., a comma-separated string or a separate roles entity),
+        // Assuming the 'role' field stores a single role string like "ROLE_STUDENT" or
+        // "ROLE_TUTOR"
+        // If your roles are stored differently (e.g., a comma-separated string or a
+        // separate roles entity),
         // you'll need to adjust this method accordingly.
         if (this.role != null && !this.role.isEmpty()) {
-            return Collections.singletonList("ROLE_" + this.role.toUpperCase()); // Prefix with "ROLE_" for Spring Security
+            return Collections.singletonList("ROLE_" + this.role.toUpperCase()); // Prefix with "ROLE_" for Spring
+                                                                                 // Security
         }
         return Collections.emptyList();
     }
 
-
-    // You might need to add constructors if you removed @NoArgsConstructor and @AllArgsConstructor
+    // You might need to add constructors if you removed @NoArgsConstructor and
+    // @AllArgsConstructor
     public User() {
     }
 
-    public User(Long id, String username, String password, String role, String email, String firstName, String lastName, LocalDateTime createdAt, LocalDateTime updatedAt, String resetPasswordToken, LocalDateTime resetPasswordExpiry) {
+    public User(Long id, String username, String password, String role, String email, String firstName, String lastName,
+            LocalDateTime createdAt, LocalDateTime updatedAt, String resetPasswordToken,
+            LocalDateTime resetPasswordExpiry) {
         this.id = id;
         this.username = username;
         this.password = password;
@@ -173,5 +178,10 @@ public class User {
         this.updatedAt = updatedAt;
         this.resetPasswordToken = resetPasswordToken;
         this.resetPasswordExpiry = resetPasswordExpiry;
+    }
+
+    public boolean isPresent() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'isPresent'");
     }
 }
