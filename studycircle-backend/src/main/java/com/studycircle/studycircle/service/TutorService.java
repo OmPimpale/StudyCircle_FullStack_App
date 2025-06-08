@@ -61,24 +61,26 @@ public class TutorService {
             // Corrected reference to updatedTutor.getProfilePictureUrl()
             // Assuming profile picture URL is directly on the Tutor model
             if (updatedTutor.getProfilePictureUrl() != null && !updatedTutor.getProfilePictureUrl().isEmpty()) {
-                 existingTutor.setProfilePictureUrl(updatedTutor.getProfilePictureUrl());
+                existingTutor.setProfilePictureUrl(updatedTutor.getProfilePictureUrl());
             }
             // Removed the else if block that tries to get profile picture from User
-            // else if (updatedTutor.getUser() != null && updatedTutor.getUser().getProfilePictureUrl() != null && !updatedTutor.getUser().getProfilePictureUrl().isEmpty()) {
-            //      existingTutor.setProfilePictureUrl(updatedTutor.getUser().getProfilePictureUrl());
+            // else if (updatedTutor.getUser() != null &&
+            // updatedTutor.getUser().getProfilePictureUrl() != null &&
+            // !updatedTutor.getUser().getProfilePictureUrl().isEmpty()) {
+            // existingTutor.setProfilePictureUrl(updatedTutor.getUser().getProfilePictureUrl());
             // }
 
             // Updating subjects might require a separate method or careful handling
             // Ensure Tutor model has getSubjects and setSubjects methods
             // if (updatedTutor.getSubjects() != null) {
-            //     existingTutor.setSubjects(updatedTutor.getSubjects()); // This might need more complex logic
+            // existingTutor.setSubjects(updatedTutor.getSubjects()); // This might need
+            // more complex logic
             // }
             // Update relationship with User if needed (consider carefully)
             // Ensure Tutor model has getUser and setUser methods
             // if (updatedTutor.getUser() != null) {
-            //     existingTutor.setUser(updatedTutor.getUser());
+            // existingTutor.setUser(updatedTutor.getUser());
             // }
-
 
             return tutorRepository.save(existingTutor);
         } else {
@@ -87,8 +89,8 @@ public class TutorService {
     }
 
     public List<Tutor> findTutorsBySubject(String subject) {
-        // Ensure TutorRepository has findBySubjectsName method
-        return tutorRepository.findBySubjectsName(subject);
+        List<Tutor> tutors = tutorRepository.findBySubjectsTaughtContainingIgnoreCase(subject);
+        return tutors;
     }
 
     public List<AvailableTimeSlot> getAvailableTimeSlots(Long tutorId, LocalDate date) {
@@ -102,36 +104,48 @@ public class TutorService {
 
         // Retrieve the tutor's scheduled sessions for the given date
         // Ensure SessionRepository has findByTutorIdAndStartTimeBetween method
-        List<Session> scheduledSessions = sessionRepository.findByTutorIdAndStartTimeBetween(tutorId, startOfDay, endOfDay);
+        List<Session> scheduledSessions = sessionRepository.findByTutorIdAndStartTimeBetween(tutorId, startOfDay,
+                endOfDay);
 
-        // TODO: Implement logic to retrieve the tutor's general availability for the given date
-        // This would involve fetching availability data from your Tutor model or a separate entity.
-        // For now, let's assume the tutor is generally available all day for demonstration purposes.
+        // TODO: Implement logic to retrieve the tutor's general availability for the
+        // given date
+        // This would involve fetching availability data from your Tutor model or a
+        // separate entity.
+        // For now, let's assume the tutor is generally available all day for
+        // demonstration purposes.
         List<AvailableTimeSlot> generalAvailability = new ArrayList<>();
         // Assuming full day availability from 9 AM to 5 PM as a simple example
         LocalDateTime availabilityStart = date.atTime(LocalTime.of(9, 0));
         LocalDateTime availabilityEnd = date.atTime(LocalTime.of(17, 0));
 
-        // For simplicity, let's add one large availability slot for the day if no sessions are scheduled
+        // For simplicity, let's add one large availability slot for the day if no
+        // sessions are scheduled
         if (scheduledSessions.isEmpty()) {
-             if (availabilityStart.isBefore(availabilityEnd)) {
-                  generalAvailability.add(new AvailableTimeSlot(availabilityStart, availabilityEnd));
-             }
+            if (availabilityStart.isBefore(availabilityEnd)) {
+                generalAvailability.add(new AvailableTimeSlot(availabilityStart, availabilityEnd));
+            }
         } else {
-             // TODO: Implement logic to subtract scheduled sessions from general availability
-             // This is a more complex task and requires careful handling of time intervals.
-             // You would iterate through the general availability periods and remove the scheduled session times.
-             // For a basic example, let's just return no available slots if there are scheduled sessions.
-             return Collections.emptyList(); // Return empty list if there are scheduled sessions (simplified)
+            // TODO: Implement logic to subtract scheduled sessions from general
+            // availability
+            // This is a more complex task and requires careful handling of time intervals.
+            // You would iterate through the general availability periods and remove the
+            // scheduled session times.
+            // For a basic example, let's just return no available slots if there are
+            // scheduled sessions.
+            return Collections.emptyList(); // Return empty list if there are scheduled sessions (simplified)
         }
 
+        // TODO: Generate available time slots by comparing general availability and
+        // scheduled sessions
+        // This involves iterating through the general availability time ranges and
+        // subtracting the scheduled session times.
+        // You'll need to define what a "time slot" is (e.g., 30 minutes, 1 hour) and
+        // generate slots accordingly.
+        // This is a complex algorithm and depends on how you define and store general
+        // availability.
 
-        // TODO: Generate available time slots by comparing general availability and scheduled sessions
-        // This involves iterating through the general availability time ranges and subtracting the scheduled session times.
-        // You'll need to define what a "time slot" is (e.g., 30 minutes, 1 hour) and generate slots accordingly.
-        // This is a complex algorithm and depends on how you define and store general availability.
-
-        // For a complete implementation, you would need to iterate through the `generalAvailability` and `scheduledSessions`
+        // For a complete implementation, you would need to iterate through the
+        // `generalAvailability` and `scheduledSessions`
         // to calculate the free time slots.
 
         // Return a list of AvailableTimeSlot DTOs
@@ -143,7 +157,10 @@ public class TutorService {
     // List<Tutor> findBySubjectsName(String subjectName);
 
     // You will also need to ensure your Tutor model has:
-    // - Getter and setter methods for qualifications, experience, bio, and profilePictureUrl
-    // - A getUser() method if profilePictureUrl is accessed via the User model (though we removed direct access in updateTutor)
-    // - Getter and setter methods for subjects if they are stored in the Tutor model
+    // - Getter and setter methods for qualifications, experience, bio, and
+    // profilePictureUrl
+    // - A getUser() method if profilePictureUrl is accessed via the User model
+    // (though we removed direct access in updateTutor)
+    // - Getter and setter methods for subjects if they are stored in the Tutor
+    // model
 }

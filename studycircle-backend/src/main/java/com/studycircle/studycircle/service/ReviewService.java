@@ -15,11 +15,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.transaction.annotation.Transactional; // Import Transactional
 
-
 import java.util.List;
 import java.time.LocalDateTime;
-
-
 
 @Service
 public class ReviewService {
@@ -29,7 +26,8 @@ public class ReviewService {
     private final UserRepository userRepository;
 
     @Autowired
-    public ReviewService(ReviewRepository reviewRepository, SessionRepository sessionRepository, UserRepository userRepository) {
+    public ReviewService(ReviewRepository reviewRepository, SessionRepository sessionRepository,
+            UserRepository userRepository) {
         this.reviewRepository = reviewRepository;
         this.sessionRepository = sessionRepository;
         this.userRepository = userRepository;
@@ -57,8 +55,9 @@ public class ReviewService {
         review.setUser(user);
         review.setRating(rating);
         review.setComment(comment);
-        // Set reviewDate to current time if not already set (though typically set on creation)
-        review.setReviewDate(LocalDateTime.now()); // Set review date to now
+        // Set reviewDate to current time if not already set (though typically set on
+        // creation)
+        review.setCreatedAt(LocalDateTime.now()); // Set review date to now
 
         return reviewRepository.save(review);
     }
@@ -86,9 +85,9 @@ public class ReviewService {
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new ResourceNotFoundException("Review not found with id: " + reviewId));
         // Validate rating range on update as well
-         if (rating < 1 || rating > 5) {
-             throw new IllegalArgumentException("Rating must be between 1 and 5.");
-         }
+        if (rating < 1 || rating > 5) {
+            throw new IllegalArgumentException("Rating must be between 1 and 5.");
+        }
         review.setRating(rating);
         review.setComment(comment);
         return reviewRepository.save(review);
@@ -98,12 +97,13 @@ public class ReviewService {
     public void deleteReview(Long reviewId) {
         // Check if review exists before deleting
         if (!reviewRepository.existsById(reviewId)) {
-             throw new ResourceNotFoundException("Review not found with id: " + reviewId);
+            throw new ResourceNotFoundException("Review not found with id: " + reviewId);
         }
         reviewRepository.deleteById(reviewId);
     }
 
-    public Page<Review> searchReviews(Integer rating, LocalDateTime startDate, LocalDateTime endDate, Long sessionId, Long userId, Pageable pageable) {
+    public Page<Review> searchReviews(Integer rating, LocalDateTime startDate, LocalDateTime endDate, Long sessionId,
+            Long userId, Pageable pageable) {
         Specification<Review> spec = Specification.where(null);
 
         if (rating != null) {
@@ -111,19 +111,28 @@ public class ReviewService {
         }
 
         if (startDate != null && endDate != null) {
-            spec = spec.and((root, query, criteriaBuilder) -> criteriaBuilder.between(root.get("reviewDate"), startDate, endDate));
+            spec = spec.and((root, query, criteriaBuilder) -> criteriaBuilder.between(root.get("createdAt"), startDate, // Changed
+                                                                                                                        // from
+                                                                                                                        // "reviewDate"
+                    endDate));
         } else if (startDate != null) {
-            spec = spec.and((root, query, criteriaBuilder) -> criteriaBuilder.greaterThanOrEqualTo(root.get("reviewDate"), startDate));
+            spec = spec.and((root, query, criteriaBuilder) -> criteriaBuilder
+                    .greaterThanOrEqualTo(root.get("createdAt"), startDate)); // Changed from "reviewDate"
         } else if (endDate != null) {
-            spec = spec.and((root, query, criteriaBuilder) -> criteriaBuilder.lessThanOrEqualTo(root.get("reviewDate"), endDate));
+            spec = spec.and((root, query, criteriaBuilder) -> criteriaBuilder.lessThanOrEqualTo(root.get("createdAt"), // Changed
+                                                                                                                       // from
+                                                                                                                       // "reviewDate"
+                    endDate));
         }
 
         if (sessionId != null) {
-            spec = spec.and((root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("session").get("id"), sessionId));
+            spec = spec.and(
+                    (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("session").get("id"), sessionId));
         }
 
         if (userId != null) {
-            spec = spec.and((root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("user").get("id"), userId));
+            spec = spec
+                    .and((root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("user").get("id"), userId));
         }
 
         return reviewRepository.findAll(spec, pageable);
